@@ -25,8 +25,6 @@ class Drawing : MonoBehaviour
         var gak = new GradientAlphaKey[0];
         gck[0].color = Color.green;
         gck[0].time = 0.0F;
-        gck[1].color = Color.blue;
-        gck[1].time = 0.5F;
         gck[1].color = Color.red;
         gck[1].time = 1.0F;
 
