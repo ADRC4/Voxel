@@ -95,48 +95,6 @@ public class Grid3d
         Debug.Log($"Time to generate grid: {watch.ElapsedMilliseconds} ms");
     }
 
-    IEnumerable<Voxel> GetNeighbours(Vector3Int index)
-    {
-        for (int zi = -1; zi <= 1; zi++)
-        {
-            int z = zi + index.z;
-            if (z == -1 || z == Size.z) continue;
-
-            for (int yi = -1; yi <= 1; yi++)
-            {
-                int y = yi + index.y;
-                if (y == -1 || y == Size.y) continue;
-
-                for (int xi = -1; xi <= 1; xi++)
-                {
-                    int x = xi + index.x;
-                    if (x == -1 || x == Size.x) continue;
-
-                    var i = new Vector3Int(x, y, z);
-                    if (index == i) continue;
-
-                    yield return Voxels[x, y, z];
-                }
-            }
-        }
-    }
-
-    IEnumerable<Voxel> GetNeighboursOrtho(Vector3Int index)
-    {
-        int x = index.x;
-        int y = index.y;
-        int z = index.z;
-
-        if (x != 0) yield return Voxels[x - 1, y, z];
-        if (x != Size.x - 1) yield return Voxels[x + 1, y, z];
-
-        if (y != 0) yield return Voxels[x, y - 1, z];
-        if (y != Size.y - 1) yield return Voxels[x, y + 1, z];
-
-        if (z != 0) yield return Voxels[x, y, z - 1];
-        if (z != Size.z - 1) yield return Voxels[x, y, z + 1];
-    }
-
     IEnumerable<Voxel> GetVoxels()
     {
         for (int z = 0; z < Size.z; z++)
@@ -146,7 +104,6 @@ public class Grid3d
                     yield return Voxels[x, y, z];
                 }
     }
-
 
     public void Analysis()
     {
