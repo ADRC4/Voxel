@@ -2,17 +2,20 @@
 using System.Linq;
 using UnityEngine;
 using BriefFiniteElementNet;
+using System.Diagnostics;
+using Debug = UnityEngine.Debug;
 
 public class Grid3d
 {
     public Voxel[,,] Voxels;
     public Corner[,,] Corners;
-    public List<Links> Links;
+    public List<Link> Links;
 
     public Vector3Int Size;
     public float VoxelSize;
     public Vector3 Corner;
     public IEnumerable<Bounds> Voids;
+    public Mesh[] Mesh;
 
     private float _displacement = 0;
 
@@ -24,13 +27,16 @@ public class Grid3d
             if (value != _displacement)
             {
                 _displacement = value;
-                foreach (var v in Voxels) v.MeshUpdate();
+                MakeMesh();
             }
         }
     }
 
     public Grid3d(IEnumerable<Bounds> voids, float voxelSize = 1.0f, float displacement = 10f)
     {
+        var watch = new Stopwatch();
+        watch.Start();
+
         Voids = voids;
         VoxelSize = voxelSize;
         _displacement = displacement;
@@ -57,20 +63,20 @@ public class Grid3d
                 }
 
         // make links
-        Links = new List<Links>();
+        Links = new List<Link>();
 
         for (int z = 0; z < Size.z; z++)
             for (int y = 0; y < Size.y; y++)
                 for (int x = 0; x < Size.x; x++)
                 {
                     if (x < Size.x - 1)
-                        Links.Add(new Links(Voxels[x, y, z], Voxels[x + 1, y, z]));
+                        Links.Add(new Link(Voxels[x, y, z], Voxels[x + 1, y, z]));
 
                     if (y < Size.y - 1)
-                        Links.Add(new Links(Voxels[x, y, z], Voxels[x, y + 1, z]));
+                        Links.Add(new Link(Voxels[x, y, z], Voxels[x, y + 1, z]));
 
                     if (z < Size.z - 1)
-                        Links.Add(new Links(Voxels[x, y, z], Voxels[x, y, z + 1]));
+                        Links.Add(new Link(Voxels[x, y, z], Voxels[x, y, z + 1]));
                 }
 
         // make corners
@@ -85,6 +91,8 @@ public class Grid3d
 
         // calculate
         Analysis();
+
+        Debug.Log($"Time to generate grid: {watch.ElapsedMilliseconds} ms");
     }
 
     IEnumerable<Voxel> GetNeighbours(Vector3Int index)
@@ -151,6 +159,7 @@ public class Grid3d
              .Distinct()
              .ToArray();
 
+
         var elements = GetVoxels()
              .Where(b => b.IsActive)
              .SelectMany(v => v.MakeTetrahedrons())
@@ -172,13 +181,32 @@ public class Grid3d
             var length = node.Displacement.magnitude;
 
             foreach (var voxel in node.GetConnectedVoxels())
-                voxel.Color += length;
+                voxel.Value += length;
         }
 
-        var min = GetVoxels().Min(v => v.Color);
-        var max = GetVoxels().Max(v => v.Color);
+        var activeVoxels = GetVoxels().Where(v => v.IsActive);
 
-        foreach (var voxel in GetVoxels())
-              voxel.Color = Mathf.InverseLerp(min, max, voxel.Color);
+        foreach (var voxel in activeVoxels)
+            voxel.Value /= voxel.GetCorners().Count();
+
+        var min = activeVoxels.Min(v => v.Value);
+        var max = activeVoxels.Max(v => v.Value);
+
+        foreach (var voxel in activeVoxels)
+            voxel.Value = Mathf.InverseLerp(min, max, voxel.Value);
+    }
+
+    public void MakeMesh()
+    {
+        Mesh = GetVoxels()
+            .Where(v => v.IsActive)
+            .Select(v =>
+        {
+            var corners = v.GetCorners()
+                    .Select(c => c.DisplacedPosition)
+                    .ToArray();
+
+            return Drawing.MakeTwistedBox(corners, v.Value, null);
+        }).ToArray();
     }
 }

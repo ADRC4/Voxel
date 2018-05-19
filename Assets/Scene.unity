@@ -379,7 +379,7 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: 0.3
+  near clip plane: 0.01
   far clip plane: 1000
   field of view: 90
   orthographic: 0
@@ -406,8 +406,8 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 282840810}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: -16.85}
-  m_LocalScale: {x: 1, y: 1.6, z: 1}
+  m_LocalPosition: {x: 0, y: 1, z: -10}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -426,7 +426,7 @@ MonoBehaviour:
   volumeTrigger: {fileID: 282840814}
   volumeLayer:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 1
   stopNaNPropagation: 1
   antialiasingMode: 2
   temporalAntialiasing:
@@ -875,7 +875,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84958b8c08d5a4a4d8fa8fa58834422e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _box: {fileID: 0}
+  _box: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
   _cylinder: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
-  _opaque: {fileID: 2100000, guid: d06bcf7dfc9bdca499a48f0511872b70, type: 2}
-  _transparent: {fileID: 2100000, guid: a949a4638cab3934a9dd6139416613fb, type: 2}
+  _opaque: {fileID: 2100000, guid: 300291c440c1b1543b0ac4b94342e6da, type: 2}
+  _transparent: {fileID: 2100000, guid: 8551294fdd979674089b84f0a3f10f0a, type: 2}

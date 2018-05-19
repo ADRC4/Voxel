@@ -6,20 +6,20 @@ using BriefFiniteElementNet.Elements;
 using Constraint = BriefFiniteElementNet.Constraints;
 using System;
 
-public class Links
+public class Link
 {
     public Voxel Start;
     public Voxel End;
-    public FrameElement2Node Frame;
+    // public FrameElement2Node Frame;
 
     public bool IsActive => Start.IsActive && End.IsActive;
 
-    public Links(Voxel start, Voxel end)
+    public Link(Voxel start, Voxel end)
     {
         Start = start;
         End = end;
-        start.Beams.Add(this);
-        end.Beams.Add(this);
+        start.Links.Add(this);
+        end.Links.Add(this);
 
         //Frame = new FrameElement2Node(start, end)
         //{

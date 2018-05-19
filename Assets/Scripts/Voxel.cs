@@ -9,12 +9,10 @@ public class Voxel
     public Vector3Int Index;
     public Vector3 Center;
     public bool IsActive;
-    public List<Links> Beams = new List<Links>(6);
-    public float Color;
-    public Vector3 Displacement;
-    public Vector3 DisplacedCenter => Center + Displacement * _grid.DisplacementScale;
+    public float Value;
+    public List<Link> Links = new List<Link>(6);
+
     Grid3d _grid;
-    public Mesh Mesh { get; set; }
 
     public Voxel(Vector3Int index, Grid3d grid)
     {
@@ -56,14 +54,5 @@ public class Voxel
 
             yield return tetra;
         }
-    }
-
-    public void MeshUpdate()
-    {
-        var corners = GetCorners()
-            .Select(c => c.DisplacedPosition)
-            .ToArray();
-
-       Mesh = Drawing.MakeTwistedBox(corners, Mesh);
     }
 }

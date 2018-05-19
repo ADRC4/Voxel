@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 class Drawing : MonoBehaviour
@@ -12,10 +13,9 @@ class Drawing : MonoBehaviour
     [SerializeField]
     Material _transparent;
 
-    public static bool IsTransparent = false;
-
     static Drawing _instance;
     static Gradient _gradient = new Gradient();
+
 
     void Awake()
     {
@@ -27,8 +27,24 @@ class Drawing : MonoBehaviour
         gck[0].time = 0.0F;
         gck[1].color = Color.red;
         gck[1].time = 1.0F;
-
         _gradient.SetKeys(gck, gak);
+
+        var texture = new Texture2D(256, 1)
+        {
+            wrapMode = TextureWrapMode.Clamp,
+        };
+
+        for (int i = 0; i < 256; i++)
+        {
+            float t = i / 255f;
+            var color = _gradient.Evaluate(t);
+            texture.SetPixel(i, 0, color);
+        }
+
+        texture.Apply();
+
+        _opaque.mainTexture = texture;
+        _transparent.mainTexture = texture;
     }
 
     public static void DrawCube(Vector3 center, float size)
@@ -47,6 +63,7 @@ class Drawing : MonoBehaviour
         var color = _gradient.Evaluate(t);
         var properties = new MaterialPropertyBlock();
         properties.SetColor("_Color", color);
+        properties.SetTexture("_MainTex", null);
 
         var vector = end - start;
 
@@ -59,19 +76,15 @@ class Drawing : MonoBehaviour
         Graphics.DrawMesh(_instance._cylinder, matrix, _instance._opaque, 0, null, 0, properties);
     }
 
-    public static void DrawMesh(Mesh mesh, float t, bool isTransparent = false)
+    public static void DrawMesh(bool isTransparent, params Mesh[] mesh)
     {
-        var color = _gradient.Evaluate(t);
-        color.a = 0.25f;
-        var properties = new MaterialPropertyBlock();
-        properties.SetColor("_Color", color);
+        var material = isTransparent ? _instance._transparent : _instance._opaque;
 
-        var mat = isTransparent ? _instance._transparent : _instance._opaque;
-
-        Graphics.DrawMesh(mesh, Matrix4x4.identity, mat, 0, null, 0, properties);
+        foreach (var m in mesh)
+            Graphics.DrawMesh(m, Matrix4x4.identity, material, 0);
     }
 
-    public static Mesh MakeTwistedBox(Vector3[] corners, Mesh mesh = null)
+    public static Mesh MakeTwistedBox(Vector3[] corners, float t, Mesh mesh = null)
     {
         Vector3 center = Vector3.zero;
         foreach (var corner in corners)
@@ -97,13 +110,13 @@ class Drawing : MonoBehaviour
 
         if (mesh == null)
         {
-            var faces = Enumerable.Range(0, 24).ToArray();
-
             mesh = new Mesh()
             {
                 vertices = v,
+                uv = Enumerable.Repeat(new Vector2(t, 0), v.Length).ToArray()
             };
 
+            var faces = Enumerable.Range(0, 24).ToArray();
             mesh.SetIndices(faces, MeshTopology.Quads, 0);
         }
         else
@@ -112,6 +125,7 @@ class Drawing : MonoBehaviour
         }
 
         mesh.RecalculateNormals();
+        mesh.RecalculateBounds();
         return mesh;
     }
 }

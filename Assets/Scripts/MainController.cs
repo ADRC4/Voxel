@@ -13,6 +13,7 @@ public class MainController : MonoBehaviour
     bool _toggleTransparency = false;
     float _displacement = 250f;
     string _voxelSize = "0.8";
+    Task _task;
 
     [SerializeField]
     GUISkin _skin;
@@ -59,42 +60,35 @@ public class MainController : MonoBehaviour
     {
         if (_grid == null) return;
         _grid.DisplacementScale = _displacement;
-
-        foreach (var voxel in _grid.Voxels)
-        {
-            if (voxel.IsActive)
-            {
-                Drawing.DrawMesh(voxel.Mesh, voxel.Color, _toggleTransparency);
-            }
-        }
+        Drawing.DrawMesh(_toggleTransparency, _grid.Mesh);
     }
 
     IEnumerator LiveUpdate()
     {
         while (true)
         {
-            if (task == null || task.IsCompleted) MakeGrid();
-            yield return new WaitForSeconds(1.0f);
+            MakeGrid();
+            yield return new WaitForSeconds(2.0f);
         }
     }
 
-    Task task;
-
     void MakeGrid()
     {
+        if (_task != null && !_task.IsCompleted) return;
+
         var bounds = _voids
-            .GetComponentsInChildren<BoxCollider>()
-           .Select(v => v.bounds)
-           .ToArray();
+                      .GetComponentsInChildren<BoxCollider>()
+                      .Select(v => v.bounds)
+                      .ToArray();
 
         var voxelSize = float.Parse(_voxelSize);
 
-        task = Task.Run(() =>
-       {
-           _grid = new Grid3d(bounds, voxelSize);
-       }).ContinueWith(t =>
-       {
-           foreach (var v in _grid.Voxels) v.MeshUpdate();
-       }, TaskScheduler.FromCurrentSynchronizationContext());
+        _task = Task.Run(() =>
+        {
+            _grid = new Grid3d(bounds, voxelSize);
+        }).ContinueWith(_ =>
+        {
+            _grid.MakeMesh();
+        }, TaskScheduler.FromCurrentSynchronizationContext());
     }
 }

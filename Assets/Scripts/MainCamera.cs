@@ -7,7 +7,7 @@ public class MainCamera : MonoBehaviour
     void Update()
     {
         const float rotateSpeed = 4.0f;
-        const float panSpeed = 0.2f;
+        const float panSpeed = 0.4f;
 
         bool pan = Input.GetAxis("Pan") == 1.0f;
         bool rotate = Input.GetAxis("Rotate") == 1.0f;
