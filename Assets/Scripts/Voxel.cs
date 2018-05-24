@@ -19,7 +19,25 @@ public class Voxel
         _grid = grid;
         Index = index;
         Center = grid.Corner + new Vector3(index.x + 0.5f, index.y + 0.5f, index.z + 0.5f) * grid.VoxelSize;
-        IsActive = !grid.Voids.Any(v => v.Contains(Center));
+        IsActive = !_grid.Voids.Any(v => IsInside(v));
+    }
+
+    bool IsInside(MeshCollider collider)
+    {
+        if (collider.convex)
+            throw new System.ArgumentException("Collider must be concave mesh.");
+
+        var point = Center;
+        RaycastHit hit;
+        int hits = 0;
+
+        while (collider.Raycast(new Ray(point, Vector3.forward), out hit, float.MaxValue))
+        {
+            point = hit.point + Vector3.forward * 0.0001f;
+            hits++;
+        }
+
+        return hits % 2 != 0;
     }
 
     public IEnumerable<Corner> GetCorners()

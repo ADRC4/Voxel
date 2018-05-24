@@ -13,7 +13,7 @@ public class MainController : MonoBehaviour
     bool _toggleTransparency = false;
     float _displacement = 250f;
     string _voxelSize = "0.8";
-    Task _task;
+    // Task _task;
 
     [SerializeField]
     GUISkin _skin;
@@ -21,6 +21,7 @@ public class MainController : MonoBehaviour
     void Awake()
     {
         _voids = GameObject.Find("Voids");
+        Physics.queriesHitBackfaces = true;
     }
 
     void OnGUI()
@@ -31,7 +32,12 @@ public class MainController : MonoBehaviour
 
         _voxelSize = GUI.TextField(new Rect(s, s * i++, 100, 20), _voxelSize);
 
-        if (_toggleUpdate != GUI.Toggle(new Rect(s, s * i++, 100, 20), _toggleUpdate, "Live update"))
+        if(GUI.Button(new Rect(s, s * i++, 100, 20),"Generate"))
+        {
+            MakeGrid();
+        }
+
+        if (_toggleUpdate != GUI.Toggle(new Rect(s, s * i++, 100, 20), _toggleUpdate, "Auto update"))
         {
             _toggleUpdate = !_toggleUpdate;
 
@@ -74,21 +80,23 @@ public class MainController : MonoBehaviour
 
     void MakeGrid()
     {
-        if (_task != null && !_task.IsCompleted) return;
+      //  if (_task != null && !_task.IsCompleted) return;
 
-        var bounds = _voids
-                      .GetComponentsInChildren<BoxCollider>()
-                      .Select(v => v.bounds)
+        var colliders = _voids
+                      .GetComponentsInChildren<MeshCollider>()
                       .ToArray();
 
         var voxelSize = float.Parse(_voxelSize);
 
-        _task = Task.Run(() =>
-        {
-            _grid = new Grid3d(bounds, voxelSize);
-        }).ContinueWith(_ =>
-        {
-            _grid.MakeMesh();
-        }, TaskScheduler.FromCurrentSynchronizationContext());
+        _grid = new Grid3d(colliders, voxelSize);
+        _grid.MakeMesh();
+
+        //_task = Task.Run(() =>
+        //{
+        //    _grid = new Grid3d(colliders, bounds,voxelSize);
+        //}).ContinueWith(_ =>
+        //{
+        //    _grid.MakeMesh();
+        //}, TaskScheduler.FromCurrentSynchronizationContext());
     }
 }

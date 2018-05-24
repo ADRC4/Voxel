@@ -14,7 +14,7 @@ public class Grid3d
     public Vector3Int Size;
     public float VoxelSize;
     public Vector3 Corner;
-    public IEnumerable<Bounds> Voids;
+    public IEnumerable<MeshCollider> Voids;
     public Mesh[] Mesh;
 
     private float _displacement = 0;
@@ -32,7 +32,7 @@ public class Grid3d
         }
     }
 
-    public Grid3d(IEnumerable<Bounds> voids, float voxelSize = 1.0f, float displacement = 10f)
+    public Grid3d(IEnumerable<MeshCollider> voids, float voxelSize = 1.0f, float displacement = 10f)
     {
         var watch = new Stopwatch();
         watch.Start();
@@ -42,7 +42,7 @@ public class Grid3d
         _displacement = displacement;
 
         var bbox = new Bounds();
-        foreach (var v in voids)
+        foreach (var v in voids.Select(v => v.bounds))
             bbox.Encapsulate(v);
 
         bbox.min = new Vector3(bbox.min.x, 0, bbox.min.z);
