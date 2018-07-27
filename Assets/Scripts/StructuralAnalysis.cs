@@ -3,7 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 
-public class MainController : MonoBehaviour
+public class StructuralAnalysis : MonoBehaviour
 {
     Grid3d _grid = null;
     GameObject _voids;
@@ -90,6 +90,7 @@ public class MainController : MonoBehaviour
 
         _grid = new Grid3d(colliders, voxelSize);
         _grid.MakeMesh();
+        _grid.Analysis();
 
         //_task = Task.Run(() =>
         //{

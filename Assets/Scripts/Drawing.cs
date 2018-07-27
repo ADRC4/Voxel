@@ -12,14 +12,17 @@ class Drawing : MonoBehaviour
     Material _opaque;
     [SerializeField]
     Material _transparent;
+    [SerializeField]
+    Material _black;
 
     static Drawing _instance;
     static Gradient _gradient = new Gradient();
-
+    //static Mesh _unitFace;
 
     void Awake()
     {
         _instance = this;
+        //_unitFace = UnitFace(0);
 
         var gck = new GradientColorKey[2];
         var gak = new GradientAlphaKey[0];
@@ -58,6 +61,36 @@ class Drawing : MonoBehaviour
         Graphics.DrawMesh(_instance._box, matrix, _instance._transparent, 0);
     }
 
+    //public static void DrawFace(Vector3 center, Normal direction, float size)
+    //{
+    //    Quaternion rotation = Quaternion.identity;
+
+    //    switch (direction)
+    //    {
+    //        case Normal.X:
+    //            rotation = Quaternion.Euler(0, 90, 0);
+    //            break;
+    //        case Normal.Y:
+    //            rotation = Quaternion.Euler(90, 0, 0);
+    //            break;
+    //        case Normal.Z:
+    //            rotation = Quaternion.Euler(0, 0, 0);
+    //            break;
+    //        default:
+    //            break;
+    //    }
+
+    //    var matrix = Matrix4x4.TRS(
+    //            center,
+    //            rotation,
+    //            Vector3.one * size
+    //            );
+
+    //    _instance._opaque.mainTexture = null;
+    //    Graphics.DrawMesh(_unitFace, matrix, _instance._opaque, 0, null, 0);
+    //    Graphics.DrawMesh(_unitFace, matrix, _instance._black, 0, null, 1);
+    //}
+
     public static void DrawBar(Vector3 start, Vector3 end, float radius, float t)
     {
         var color = _gradient.Evaluate(t);
@@ -81,7 +114,11 @@ class Drawing : MonoBehaviour
         var material = isTransparent ? _instance._transparent : _instance._opaque;
 
         foreach (var m in mesh)
+        {
             Graphics.DrawMesh(m, Matrix4x4.identity, material, 0);
+            if (m.subMeshCount > 1)
+                Graphics.DrawMesh(m, Matrix4x4.identity, _instance._black, 0, null, 1);
+        }
     }
 
     public static Mesh MakeTwistedBox(Vector3[] corners, float t, Mesh mesh = null)
@@ -125,6 +162,71 @@ class Drawing : MonoBehaviour
         }
 
         mesh.RecalculateNormals();
+        mesh.RecalculateBounds();
+        return mesh;
+    }
+
+    public static Mesh MakeFace(Vector3 center, Normal direction, float size, float t)
+    {
+        Quaternion rotation = Quaternion.identity;
+
+        switch (direction)
+        {
+            case Normal.X:
+                rotation = Quaternion.Euler(0, 90, 0);
+                break;
+            case Normal.Y:
+                rotation = Quaternion.Euler(90, 0, 0);
+                break;
+            case Normal.Z:
+                rotation = Quaternion.Euler(0, 0, 0);
+                break;
+        }
+
+        var f = new[]
+        {
+            0,1,2,3,
+            7,6,5,4
+        };
+
+        var l = new[]
+        {
+            0,1,2,3,0
+        };
+
+        float s = size * 0.5f;
+
+        var v = new[]
+        {
+            new Vector3(-s,-s,0),
+            new Vector3(s,-s,0),
+            new Vector3(s,s,0),
+            new Vector3(-s,s,0),
+            new Vector3(-s,-s,0),
+            new Vector3(s,-s,0),
+            new Vector3(s,s,0),
+            new Vector3(-s,s,0)
+        };
+
+        for (int i = 0; i < v.Length; i++)
+        {
+            v[i] = rotation * v[i];
+            v[i] += center;
+        }
+
+        var mesh = new Mesh()
+        {
+            vertices = v,
+            uv = Enumerable.Repeat(new Vector2(t, 0), v.Length).ToArray(),
+            subMeshCount = 2
+        };
+
+        mesh.SetIndices(f, MeshTopology.Quads, 0);
+        mesh.SetIndices(l, MeshTopology.LineStrip, 1);
+
+        var n = Vector3.forward;
+
+        mesh.normals = new[] { n, n, n, n, -n, -n, -n, -n };
         mesh.RecalculateBounds();
         return mesh;
     }

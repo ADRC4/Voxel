@@ -10,7 +10,7 @@ public class Voxel
     public Vector3 Center;
     public bool IsActive;
     public float Value;
-    public List<Link> Links = new List<Link>(6);
+    public List<Face> Faces = new List<Face>(6);
 
     Grid3d _grid;
 
@@ -19,7 +19,7 @@ public class Voxel
         _grid = grid;
         Index = index;
         Center = grid.Corner + new Vector3(index.x + 0.5f, index.y + 0.5f, index.z + 0.5f) * grid.VoxelSize;
-        IsActive = !_grid.Voids.Any(v => IsInside(v));
+        IsActive = !_grid.Voids.Any(IsInside);
     }
 
     bool IsInside(MeshCollider collider)
