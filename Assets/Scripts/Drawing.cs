@@ -225,6 +225,7 @@ class Drawing : MonoBehaviour
         mesh.SetIndices(l, MeshTopology.LineStrip, 1);
 
         var n = Vector3.forward;
+        n = rotation * n;
 
         mesh.normals = new[] { n, n, n, n, -n, -n, -n, -n };
         mesh.RecalculateBounds();

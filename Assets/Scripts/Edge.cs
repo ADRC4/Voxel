@@ -45,10 +45,10 @@ public class Edge
             case Normal.Y:
                 return new[]
                 {
-                  (x == 0 || z == 0) ? null : _grid.Voxels[x - 1, y, z - 1],
-                  (x == _grid.Size.x || z == 0) ? null : _grid.Voxels[x, y, z - 1],
-                  (x == 0 || z == _grid.Size.z) ? null : _grid.Voxels[x - 1, y, z],
-                  (x == _grid.Size.x || z == _grid.Size.z) ? null : _grid.Voxels[x, y, z]
+                   (x == 0 || z == 0) ? null : _grid.Voxels[x - 1, y, z - 1],
+                   (x == _grid.Size.x || z == 0) ? null : _grid.Voxels[x, y, z - 1],
+                   (x == 0 || z == _grid.Size.z) ? null : _grid.Voxels[x - 1, y, z],
+                   (x == _grid.Size.x || z == _grid.Size.z) ? null : _grid.Voxels[x, y, z]
                 };
             case Normal.Z:
                 return new[]
@@ -57,7 +57,7 @@ public class Edge
                    (x == _grid.Size.x || y == 0) ? null : _grid.Voxels[x, y - 1, z],
                    (x == 0 || y == _grid.Size.y) ? null : _grid.Voxels[x - 1, y, z],
                    (x == _grid.Size.x || y == _grid.Size.y) ? null : _grid.Voxels[x, y, z]
-        };
+                };
             default:
                 throw new Exception("Wrong direction.");
         }
