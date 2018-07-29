@@ -30,14 +30,7 @@ public class PathFinding : MonoBehaviour
     void Update()
     {
         if (_grid == null) return;
-
-        foreach (var face in _grid.Faces.Where(f => f.IsClimbable))
-        {
-            if (face.Geometry == null)
-                face.Geometry = Drawing.MakeFace(face.Center, face.Direction, _grid.VoxelSize, 1);
-
-            Drawing.DrawMesh(false, face.Geometry);
-        }
+        //   Drawing.DrawMesh(false, _grid.Mesh);
     }
 
     void OnGUI()
@@ -75,8 +68,8 @@ public class PathFinding : MonoBehaviour
         var edges = _grid.Edges.Where(e => e.ClimbableFaces.Length == 2);
 
         // create graph from edges
-        var graphEdges = edges.Select(e => new Edge<Face>(e.ClimbableFaces[0], e.ClimbableFaces[1]));
-        var graph = graphEdges.ToUndirectedGraph<Face, Edge<Face>>();
+        var graphEdges = edges.Select(e => new TaggedEdge<Face, Edge>(e.ClimbableFaces[0], e.ClimbableFaces[1], e));
+        var graph = graphEdges.ToUndirectedGraph<Face, TaggedEdge<Face, Edge>>();
 
         // start face for shortest path
         var start = _grid.Faces.Where(f => f.IsClimbable).Skip(10).First();
@@ -84,26 +77,74 @@ public class PathFinding : MonoBehaviour
         // calculate shortest path from start face to all boundary faces
         var shortest = QuickGraph.Algorithms.AlgorithmExtensions.ShortestPathsDijkstra(graph, e => 1.0, start);
 
-        // create a mesh face for every outer face colored based on the path length
+        // select an end face to draw one specific path
+        var end = _grid.Faces.Where(f => f.IsClimbable).Skip(200).First();
+
+        IEnumerable<TaggedEdge<Face, Edge>> endPath;
+        shortest(end, out endPath);
+
+        // unsorted distinct faces of the path from start to end faces
+        var endPathFaces = new HashSet<Face>(endPath.SelectMany(e => new[] { e.Source, e.Target }));
+
+        // create a mesh face for every outer face colored based on the path length (except a solid yellow path to end face)
+        var mesh = new Mesh()
+        {
+            indexFormat = UnityEngine.Rendering.IndexFormat.UInt32
+        };
+
+        var meshes = new List<CombineInstance>();
+
         foreach (var face in _grid.Faces.Where(f => f.IsClimbable))
         {
             float t = 1;
 
-            if (face == start)
+            IEnumerable<TaggedEdge<Face, Edge>> path;
+            if (shortest(face, out path))
             {
-                t = 1;
+                t = path.Count() * 0.04f;
+                t = Mathf.Clamp01(t);
+            }
+
+            Mesh faceMesh;
+
+            // paint face yellow if its part of the start-end path, gradient color for other faces
+            if (endPathFaces.Contains(face))
+            {
+                faceMesh = Drawing.MakeFace(face.Center, face.Direction, _grid.VoxelSize, 0, 1);
             }
             else
             {
-                IEnumerable<Edge<Face>> path;
-                if (shortest(face, out path))
-                {
-                    t = path.Count() * 0.06f;
-                    t = Mathf.Clamp01(t);
-                }
+                faceMesh = Drawing.MakeFace(face.Center, face.Direction, _grid.VoxelSize, t);
             }
 
-            face.Geometry = Drawing.MakeFace(face.Center, face.Direction, _grid.VoxelSize, t);
+            meshes.Add(new CombineInstance() { mesh = faceMesh });
+        }
+
+        mesh.CombineMeshes(meshes.ToArray(), true, false, false);
+        GetComponent<MeshFilter>().mesh = mesh;
+
+        // draw a polyline for the start-end path
+        {
+            IEnumerable<TaggedEdge<Face, Edge>> path;
+            if (shortest(end, out path))
+            {
+                int vertexCount = mesh.vertexCount;
+                var vertices = new List<Vector3>(mesh.vertices);
+
+                var current = start;
+                vertices.Add(current.Center);
+
+                foreach (var edge in path)
+                {
+                    vertices.Add(edge.Tag.Center);
+                    current = edge.GetOtherVertex(current);
+                    vertices.Add(current.Center);
+                }
+
+                mesh.SetVertices(vertices);
+                mesh.subMeshCount = 2;
+                mesh.SetIndices(Enumerable.Range(vertexCount, vertices.Count - vertexCount).ToArray(), MeshTopology.LineStrip, 1);
+            }
         }
     }
 

@@ -30,7 +30,7 @@ public class Grid3d
             if (value != _displacement)
             {
                 _displacement = value;
-                MakeMesh();
+                MakeVoxelMesh();
             }
         }
     }
@@ -187,7 +187,7 @@ public class Grid3d
             voxel.Value = Mathf.InverseLerp(min, max, voxel.Value);
     }
 
-    public void MakeMesh()
+    public void MakeVoxelMesh()
     {
         Mesh = GetVoxels()
             .Where(v => v.IsActive)

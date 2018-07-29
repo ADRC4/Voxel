@@ -9,6 +9,7 @@ public class Edge
 {
     public Vector3Int Index;
     public Normal Direction;
+    public Vector3 Center;
     public Voxel[] Voxels;
     public Face[] Faces;
     public Face[] ClimbableFaces;
@@ -18,12 +19,31 @@ public class Edge
     public Edge(int x, int y, int z, Normal direction, Grid3d grid)
     {
         _grid = grid;
-
         Index = new Vector3Int(x, y, z);
         Direction = direction;
+        Center = GetCenter();
         Voxels = GetVoxels();
         Faces = GetFaces();
         ClimbableFaces = Faces.Where(f => f != null && f.IsClimbable).ToArray();
+    }
+
+    Vector3 GetCenter()
+    {
+        int x = Index.x;
+        int y = Index.y;
+        int z = Index.z;
+
+        switch (Direction)
+        {
+            case Normal.X:
+                return _grid.Corner + new Vector3(x + 0.5f, y, z) * _grid.VoxelSize;
+            case Normal.Y:
+                return _grid.Corner + new Vector3(x, y + 0.5f, z) * _grid.VoxelSize;
+            case Normal.Z:
+                return _grid.Corner + new Vector3(x, y, z + 0.5f) * _grid.VoxelSize;
+            default:
+                throw new Exception("Wrong direction.");
+        }
     }
 
     Voxel[] GetVoxels()

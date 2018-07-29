@@ -32,7 +32,7 @@ class Drawing : MonoBehaviour
         gck[1].time = 1.0F;
         _gradient.SetKeys(gck, gak);
 
-        var texture = new Texture2D(256, 1)
+        var texture = new Texture2D(256, 2)
         {
             wrapMode = TextureWrapMode.Clamp,
         };
@@ -43,6 +43,8 @@ class Drawing : MonoBehaviour
             var color = _gradient.Evaluate(t);
             texture.SetPixel(i, 0, color);
         }
+
+        texture.SetPixel(0, 1, Color.yellow);
 
         texture.Apply();
 
@@ -116,6 +118,7 @@ class Drawing : MonoBehaviour
         foreach (var m in mesh)
         {
             Graphics.DrawMesh(m, Matrix4x4.identity, material, 0);
+
             if (m.subMeshCount > 1)
                 Graphics.DrawMesh(m, Matrix4x4.identity, _instance._black, 0, null, 1);
         }
@@ -166,7 +169,7 @@ class Drawing : MonoBehaviour
         return mesh;
     }
 
-    public static Mesh MakeFace(Vector3 center, Normal direction, float size, float t)
+    public static Mesh MakeFace(Vector3 center, Normal direction, float size, float u,float v = 0)
     {
         Quaternion rotation = Quaternion.identity;
 
@@ -183,20 +186,26 @@ class Drawing : MonoBehaviour
                 break;
         }
 
-        var f = new[]
+        //var f = new[]
+        //{
+        //    0,1,2,3,
+        //    7,6,5,4
+        //};
+
+        var tris = new[]
         {
-            0,1,2,3,
-            7,6,5,4
+            0,1,2, 0,2,3,
+            6,5,4, 7,6,4
         };
 
-        var l = new[]
-        {
-            0,1,2,3,0
-        };
+        //var l = new[]
+        //{
+        //    0,1,2,3,0
+        //};
 
         float s = size * 0.5f;
 
-        var v = new[]
+        var vertices = new[]
         {
             new Vector3(-s,-s,0),
             new Vector3(s,-s,0),
@@ -208,27 +217,30 @@ class Drawing : MonoBehaviour
             new Vector3(-s,s,0)
         };
 
-        for (int i = 0; i < v.Length; i++)
+        for (int i = 0; i < vertices.Length; i++)
         {
-            v[i] = rotation * v[i];
-            v[i] += center;
+            vertices[i] = rotation * vertices[i];
+            vertices[i] += center;
         }
+
+        var n = -Vector3.forward;
+        n = rotation * n;
 
         var mesh = new Mesh()
         {
-            vertices = v,
-            uv = Enumerable.Repeat(new Vector2(t, 0), v.Length).ToArray(),
-            subMeshCount = 2
+            vertices = vertices,
+            normals = new[] { n, n, n, n, -n, -n, -n, -n },
+            uv = Enumerable.Repeat(new Vector2(u, v), vertices.Length).ToArray(),
+            indexFormat = UnityEngine.Rendering.IndexFormat.UInt32,
+           // subMeshCount = 2,
         };
 
-        mesh.SetIndices(f, MeshTopology.Quads, 0);
-        mesh.SetIndices(l, MeshTopology.LineStrip, 1);
+        mesh.SetIndices(tris, MeshTopology.Triangles, 0);
+        //mesh.SetIndices(l, MeshTopology.LineStrip, 1);
+       // mesh.SetIndices(f, MeshTopology.Quads, 0);
 
-        var n = Vector3.forward;
-        n = rotation * n;
-
-        mesh.normals = new[] { n, n, n, n, -n, -n, -n, -n };
         mesh.RecalculateBounds();
+       // mesh.RecalculateTangents();
         return mesh;
     }
 }
