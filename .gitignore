@@ -33,3 +33,6 @@ sysinfo.txt
 # Builds
 *.apk
 *.unitypackage
+/Assets/Scripts/Genetic.cs
+/Assets/Genetic.unity.meta
+/Assets/Genetic.unity

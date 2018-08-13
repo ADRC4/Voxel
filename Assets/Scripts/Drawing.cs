@@ -17,7 +17,10 @@ class Drawing : MonoBehaviour
 
     static Drawing _instance;
     static Gradient _gradient = new Gradient();
-    //static Mesh _unitFace;
+
+    public static System.Random Random = new System.Random(42);
+
+    static Mesh _unitBox;
 
     void Awake()
     {
@@ -45,11 +48,18 @@ class Drawing : MonoBehaviour
         }
 
         texture.SetPixel(0, 1, Color.yellow);
+        texture.SetPixel(1, 1, Color.gray);
 
         texture.Apply();
 
         _opaque.mainTexture = texture;
         _transparent.mainTexture = texture;
+        _unitBox = new Mesh();
+        _unitBox.vertices = _box.vertices;
+        _unitBox.normals = _box.normals;
+        _unitBox.uv = _box.uv.Select(_ => new Vector2(1.5f / 255f, 0.75f)).ToArray();
+        _unitBox.triangles = _box.triangles;
+        _unitBox.tangents = _box.tangents;
     }
 
     public static void DrawCube(Vector3 center, float size)
@@ -57,10 +67,10 @@ class Drawing : MonoBehaviour
         var matrix = Matrix4x4.TRS(
                 center,
                 Quaternion.identity,
-                Vector3.one * (size * 0.999f)
+                Vector3.one * (size * 0.96f)
                 );
 
-        Graphics.DrawMesh(_instance._box, matrix, _instance._transparent, 0);
+        Graphics.DrawMesh(_unitBox, matrix, _instance._opaque, 0);
     }
 
     //public static void DrawFace(Vector3 center, Normal direction, float size)
@@ -169,7 +179,7 @@ class Drawing : MonoBehaviour
         return mesh;
     }
 
-    public static Mesh MakeFace(Vector3 center, Normal direction, float size, float u,float v = 0)
+    public static Mesh MakeFace(Vector3 center, Normal direction, float size, float u, float v = 0)
     {
         Quaternion rotation = Quaternion.identity;
 
@@ -232,15 +242,15 @@ class Drawing : MonoBehaviour
             normals = new[] { n, n, n, n, -n, -n, -n, -n },
             uv = Enumerable.Repeat(new Vector2(u, v), vertices.Length).ToArray(),
             indexFormat = UnityEngine.Rendering.IndexFormat.UInt32,
-           // subMeshCount = 2,
+            // subMeshCount = 2,
         };
 
         mesh.SetIndices(tris, MeshTopology.Triangles, 0);
         //mesh.SetIndices(l, MeshTopology.LineStrip, 1);
-       // mesh.SetIndices(f, MeshTopology.Quads, 0);
+        // mesh.SetIndices(f, MeshTopology.Quads, 0);
 
         mesh.RecalculateBounds();
-       // mesh.RecalculateTangents();
+        // mesh.RecalculateTangents();
         return mesh;
     }
 }

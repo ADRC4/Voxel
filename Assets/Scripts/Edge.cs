@@ -12,7 +12,7 @@ public class Edge
     public Vector3 Center;
     public Voxel[] Voxels;
     public Face[] Faces;
-    public Face[] ClimbableFaces;
+    public Face[] ClimbableFaces => Faces.Where(f => f != null && f.IsClimbable).ToArray();
 
     Grid3d _grid;
 
@@ -24,7 +24,6 @@ public class Edge
         Center = GetCenter();
         Voxels = GetVoxels();
         Faces = GetFaces();
-        ClimbableFaces = Faces.Where(f => f != null && f.IsClimbable).ToArray();
     }
 
     Vector3 GetCenter()

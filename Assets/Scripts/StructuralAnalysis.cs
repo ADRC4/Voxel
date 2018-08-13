@@ -88,7 +88,7 @@ public class StructuralAnalysis : MonoBehaviour
 
         var voxelSize = float.Parse(_voxelSize);
 
-        _grid = new Grid3d(colliders, voxelSize);
+        _grid = Grid3d.MakeGridWithVoids(colliders, voxelSize);
         _grid.Analysis();
         _grid.MakeVoxelMesh();
 

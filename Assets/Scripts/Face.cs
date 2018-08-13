@@ -12,8 +12,8 @@ public class Face
     public Vector3Int Index;
     public Vector3 Center;
     public Normal Direction;
-    //public float NormalizedDistance = 0f;
-    public Mesh Geometry;
+    // public float NormalizedDistance = 0f;
+    // public Mesh Geometry;
 
     Grid3d _grid;
     // public FrameElement2Node Frame;

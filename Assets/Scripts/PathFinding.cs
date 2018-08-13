@@ -18,7 +18,6 @@ public class PathFinding : MonoBehaviour
     private void Awake()
     {
         _voids = GameObject.Find("Voids");
-        Physics.queriesHitBackfaces = true;
     }
 
     private void Start()
@@ -62,7 +61,7 @@ public class PathFinding : MonoBehaviour
                       .ToArray();
 
         var voxelSize = float.Parse(_voxelSize);
-        _grid = new Grid3d(colliders, voxelSize);
+        _grid = Grid3d.MakeGridWithVoids(colliders, voxelSize);
 
         // select edges of boundary faces
         var edges = _grid.Edges.Where(e => e.ClimbableFaces.Length == 2);

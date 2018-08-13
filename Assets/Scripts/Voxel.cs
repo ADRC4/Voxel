@@ -3,6 +3,7 @@ using System.Linq;
 using UnityEngine;
 using BriefFiniteElementNet;
 using BriefFiniteElementNet.Elements;
+using System;
 
 public class Voxel
 {
@@ -12,6 +13,8 @@ public class Voxel
     public float Value;
     public List<Face> Faces = new List<Face>(6);
 
+    public bool IsClimbable => IsActive && Faces.Any(f => f.IsClimbable);
+
     Grid3d _grid;
 
     public Voxel(Vector3Int index, Grid3d grid)
@@ -19,10 +22,10 @@ public class Voxel
         _grid = grid;
         Index = index;
         Center = grid.Corner + new Vector3(index.x + 0.5f, index.y + 0.5f, index.z + 0.5f) * grid.VoxelSize;
-        IsActive = !_grid.Voids.Any(IsInside);
+        IsActive = true;
     }
 
-    bool IsInside(MeshCollider collider)
+    internal bool IsInside(MeshCollider collider)
     {
         if (collider.convex)
             throw new System.ArgumentException("Collider must be concave mesh.");

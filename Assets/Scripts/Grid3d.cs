@@ -3,6 +3,7 @@ using System.Linq;
 using UnityEngine;
 using BriefFiniteElementNet;
 using System.Diagnostics;
+using QuickGraph;
 using Debug = UnityEngine.Debug;
 
 public enum Normal { X, Y, Z };
@@ -17,7 +18,9 @@ public class Grid3d
     public Vector3Int Size;
     public float VoxelSize;
     public Vector3 Corner;
-    public IEnumerable<MeshCollider> Voids;
+    public Bounds Bbox;
+
+
     public Mesh[] Mesh;
 
     private float _displacement = 0;
@@ -35,18 +38,26 @@ public class Grid3d
         }
     }
 
-    public Grid3d(IEnumerable<MeshCollider> voids, float voxelSize = 1.0f, float displacement = 10f)
+    public static Grid3d MakeGridWithVoids(IEnumerable<MeshCollider> voids, float voxelSize)
+    {
+        var bbox = new Bounds();
+        foreach (var v in voids.Select(v => v.bounds))
+            bbox.Encapsulate(v);
+
+        var grid = new Grid3d(bbox, voxelSize);
+        grid.AddVoids(voids);
+
+        return grid;
+    }
+
+    public Grid3d(Bounds bbox, float voxelSize = 1.0f, float displacement = 10f)
     {
         var watch = new Stopwatch();
         watch.Start();
 
-        Voids = voids;
+        Bbox = bbox;
         VoxelSize = voxelSize;
         _displacement = displacement;
-
-        var bbox = new Bounds();
-        foreach (var v in voids.Select(v => v.bounds))
-            bbox.Encapsulate(v);
 
         bbox.min = new Vector3(bbox.min.x, 0, bbox.min.z);
         var sizef = bbox.size / voxelSize;
@@ -126,7 +137,24 @@ public class Grid3d
         // calculate
         //Analysis();
 
-        Debug.Log($"Time to generate grid: {watch.ElapsedMilliseconds} ms");
+       // Debug.Log($"Time to generate grid: {watch.ElapsedMilliseconds} ms");
+
+       // Debug.Log($"Grid size: {Size} units = {Size.x * Size.y * Size.z} voxels.");
+    }
+
+    public Grid3d Clone()
+    {
+        return new Grid3d(Bbox, VoxelSize);
+    }
+
+    public void AddVoids(IEnumerable<MeshCollider> voids)
+    {
+        Physics.queriesHitBackfaces = true;
+
+        foreach (var voxel in GetVoxels())
+        {
+            voxel.IsActive = !voids.Any(voxel.IsInside);
+        }
     }
 
     public IEnumerable<Voxel> GetVoxels()
@@ -137,6 +165,17 @@ public class Grid3d
                 {
                     yield return Voxels[x, y, z];
                 }
+    }
+
+    public int GetConnectedComponents()
+    {
+        var graph = new UndirectedGraph<Voxel, Edge<Voxel>>();
+        graph.AddVertexRange(GetVoxels().Where(v => v.IsActive));
+        graph.AddEdgeRange(Faces.Where(f => f.IsActive).Select(f => new Edge<Voxel>(f.Voxels[0], f.Voxels[1])));
+
+        Dictionary<Voxel, int> components = new Dictionary<Voxel, int>();
+        var count = QuickGraph.Algorithms.AlgorithmExtensions.ConnectedComponents(graph, components);
+        return count;
     }
 
     public void Analysis()
