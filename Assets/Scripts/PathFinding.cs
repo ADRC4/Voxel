@@ -64,20 +64,20 @@ public class PathFinding : MonoBehaviour
         _grid = Grid3d.MakeGridWithVoids(colliders, voxelSize);
 
         // select edges of boundary faces
-        var edges = _grid.Edges.Where(e => e.ClimbableFaces.Length == 2);
+        var edges = _grid.GetEdges().Where(e => e.ClimbableFaces.Length == 2);
 
         // create graph from edges
         var graphEdges = edges.Select(e => new TaggedEdge<Face, Edge>(e.ClimbableFaces[0], e.ClimbableFaces[1], e));
         var graph = graphEdges.ToUndirectedGraph<Face, TaggedEdge<Face, Edge>>();
 
         // start face for shortest path
-        var start = _grid.Faces.Where(f => f.IsClimbable).Skip(10).First();
+        var start = _grid.GetFaces().Where(f => f.IsClimbable).Skip(10).First();
 
         // calculate shortest path from start face to all boundary faces
         var shortest = QuickGraph.Algorithms.AlgorithmExtensions.ShortestPathsDijkstra(graph, e => 1.0, start);
 
         // select an end face to draw one specific path
-        var end = _grid.Faces.Where(f => f.IsClimbable).Skip(200).First();
+        var end = _grid.GetFaces().Where(f => f.IsClimbable).Skip(200).First();
 
         IEnumerable<TaggedEdge<Face, Edge>> endPath;
         shortest(end, out endPath);
@@ -93,7 +93,7 @@ public class PathFinding : MonoBehaviour
 
         var meshes = new List<CombineInstance>();
 
-        foreach (var face in _grid.Faces.Where(f => f.IsClimbable))
+        foreach (var face in _grid.GetFaces().Where(f => f.IsClimbable))
         {
             float t = 1;
 

@@ -12,6 +12,9 @@ public class Face
     public Vector3Int Index;
     public Vector3 Center;
     public Normal Direction;
+
+    public Edge[] Edges => GetEdges();
+    public Corner[] Corners => GetCorners();
     // public float NormalizedDistance = 0f;
     // public Mesh Geometry;
 
@@ -103,5 +106,70 @@ public class Face
             default:
                 throw new Exception("Wrong direction.");
         }
+    }
+
+    Edge[] GetEdges()
+    {
+        int x = Index.x;
+        int y = Index.y;
+        int z = Index.z;
+
+        var edges = new Edge[4];
+        int i = 0;
+
+        if (Direction != Normal.X)
+        {
+            edges[i++] = _grid.Edges[0][x, y, z];
+            edges[i++] = _grid.Edges[0][x + 1, y, z];
+        }
+
+        if (Direction != Normal.Y)
+        {
+            edges[i++] = _grid.Edges[1][x, y, z];
+            edges[i++] = _grid.Edges[1][x, y + 1, z];
+        }
+
+        if (Direction != Normal.Z)
+        {
+            edges[i++] = _grid.Edges[2][x, y, z];
+            edges[i++] = _grid.Edges[2][x, y, z + 1];
+        }
+
+        return edges;
+    }
+
+    Corner[] GetCorners()
+    {
+        int x = Index.x;
+        int y = Index.y;
+        int z = Index.z;
+
+        var corners = new Corner[4];
+
+        if (Direction == Normal.X)
+        {
+            corners[0] = _grid.Corners[x, y, z];
+            corners[1] = _grid.Corners[x, y + 1, z];
+            corners[2] = _grid.Corners[x, y, z + 1];
+            corners[3] = _grid.Corners[x, y + 1, z + 1];
+        }
+
+        if (Direction == Normal.Y)
+        {
+            corners[0] = _grid.Corners[x, y, z];
+            corners[1] = _grid.Corners[x + 1, y, z];
+            corners[2] = _grid.Corners[x, y, z + 1];
+            corners[3] = _grid.Corners[x + 1, y, z + 1];
+        }
+
+        if (Direction == Normal.Z)
+        {
+            corners[0] = _grid.Corners[x, y, z];
+            corners[1] = _grid.Corners[x + 1, y, z];
+            corners[2] = _grid.Corners[x, y + 1, z];
+            corners[3] = _grid.Corners[x + 1, y + 1, z];
+        }
+
+        return corners;
     }
 }

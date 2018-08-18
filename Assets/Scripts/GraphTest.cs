@@ -79,7 +79,7 @@ public class GraphTest : MonoBehaviour
 
     void RemoveVoxels(CancellationToken token)
     {
-        int lastClimbable = _grid.Faces.Count(f => f.IsClimbable);
+        int lastClimbable = _grid.GetFaces().Count(f => f.IsClimbable);
 
         for (int i = 0; i < 100000; i++)
         {
@@ -94,7 +94,7 @@ public class GraphTest : MonoBehaviour
             if (_grid.GetConnectedComponents() != 1)
                 active.IsActive = true;
 
-            int climbableCount = _grid.Faces.Count(f => f.IsClimbable);
+            int climbableCount = _grid.GetFaces().Count(f => f.IsClimbable);
 
             if (climbableCount < lastClimbable)
                 active.IsActive = true;

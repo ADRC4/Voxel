@@ -30,6 +30,7 @@ static class Util
         foreach (var item in items)
         {
             var value = selector(item);
+
             if(value < minValue)
             {
                 minValue = value;

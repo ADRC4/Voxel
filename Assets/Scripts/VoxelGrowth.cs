@@ -68,7 +68,7 @@ public class VoxelGrowth : MonoBehaviour
         var voxelSize = float.Parse(_voxelSize);
         _grid = Grid3d.MakeGridWithVoids(colliders, voxelSize);
 
-        var faces = _grid.Faces.Where(f => f.IsActive);
+        var faces = _grid.GetFaces().Where(f => f.IsActive);
         var graphEdges = faces.Select(f => new TaggedEdge<Voxel, Face>(f.Voxels[0], f.Voxels[1], f));
         var graph = graphEdges.ToUndirectedGraph<Voxel, TaggedEdge<Voxel, Face>>();
 
