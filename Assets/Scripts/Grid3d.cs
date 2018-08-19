@@ -12,7 +12,6 @@ public class Grid3d
 {
     public Voxel[,,] Voxels;
     public Corner[,,] Corners;
-
     public Face[][,,] Faces = new Face[3][,,];
     public Edge[][,,] Edges = new Edge[3][,,];
 

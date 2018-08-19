@@ -114,28 +114,35 @@ public class Face
         int y = Index.y;
         int z = Index.z;
 
-        var edges = new Edge[4];
-        int i = 0;
-
-        if (Direction != Normal.X)
+        switch (Direction)
         {
-            edges[i++] = _grid.Edges[0][x, y, z];
-            edges[i++] = _grid.Edges[0][x + 1, y, z];
+            case Normal.X:
+                return new[]
+                {
+                  _grid.Edges[1][x, y, z],
+                  _grid.Edges[1][x, y, z + 1],
+                  _grid.Edges[2][x, y, z],
+                  _grid.Edges[2][x, y + 1, z]
+                };
+            case Normal.Y:
+                return new[]
+                {
+                  _grid.Edges[0][x, y, z],
+                  _grid.Edges[0][x, y, z + 1],
+                  _grid.Edges[2][x, y, z],
+                  _grid.Edges[2][x + 1, y, z]
+                };
+            case Normal.Z:
+                return new[]
+               {
+                  _grid.Edges[0][x, y, z],
+                  _grid.Edges[0][x, y + 1, z],
+                  _grid.Edges[1][x, y, z],
+                  _grid.Edges[1][x + 1, y, z]
+                };
+            default:
+                throw new Exception("Wrong direction.");
         }
-
-        if (Direction != Normal.Y)
-        {
-            edges[i++] = _grid.Edges[1][x, y, z];
-            edges[i++] = _grid.Edges[1][x, y + 1, z];
-        }
-
-        if (Direction != Normal.Z)
-        {
-            edges[i++] = _grid.Edges[2][x, y, z];
-            edges[i++] = _grid.Edges[2][x, y, z + 1];
-        }
-
-        return edges;
     }
 
     Corner[] GetCorners()
@@ -144,32 +151,34 @@ public class Face
         int y = Index.y;
         int z = Index.z;
 
-        var corners = new Corner[4];
-
-        if (Direction == Normal.X)
+        switch (Direction)
         {
-            corners[0] = _grid.Corners[x, y, z];
-            corners[1] = _grid.Corners[x, y + 1, z];
-            corners[2] = _grid.Corners[x, y, z + 1];
-            corners[3] = _grid.Corners[x, y + 1, z + 1];
+            case Normal.X:
+                return new[]
+                {
+                 _grid.Corners[x, y, z],
+                 _grid.Corners[x, y + 1, z],
+                 _grid.Corners[x, y, z + 1],
+                 _grid.Corners[x, y + 1, z + 1]
+                };
+            case Normal.Y:
+                return new[]
+                {
+                 _grid.Corners[x, y, z],
+                 _grid.Corners[x + 1, y, z],
+                 _grid.Corners[x, y, z + 1],
+                 _grid.Corners[x + 1, y, z + 1]
+                };
+            case Normal.Z:
+                return new[]
+{
+                 _grid.Corners[x, y, z],
+                 _grid.Corners[x + 1, y, z],
+                 _grid.Corners[x, y + 1, z],
+                 _grid.Corners[x + 1, y + 1, z]
+                };
+            default:
+                throw new Exception("Wrong direction.");
         }
-
-        if (Direction == Normal.Y)
-        {
-            corners[0] = _grid.Corners[x, y, z];
-            corners[1] = _grid.Corners[x + 1, y, z];
-            corners[2] = _grid.Corners[x, y, z + 1];
-            corners[3] = _grid.Corners[x + 1, y, z + 1];
-        }
-
-        if (Direction == Normal.Z)
-        {
-            corners[0] = _grid.Corners[x, y, z];
-            corners[1] = _grid.Corners[x + 1, y, z];
-            corners[2] = _grid.Corners[x, y + 1, z];
-            corners[3] = _grid.Corners[x + 1, y + 1, z];
-        }
-
-        return corners;
     }
 }

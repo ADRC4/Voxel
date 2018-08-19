@@ -28,7 +28,7 @@ public class Voxel
     internal bool IsInside(MeshCollider collider)
     {
         if (collider.convex)
-            throw new System.ArgumentException("Collider must be concave mesh.");
+            throw new ArgumentException("Collider must be concave mesh.");
 
         var point = Center;
         RaycastHit hit;
