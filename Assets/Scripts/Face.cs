@@ -8,6 +8,8 @@ using QuickGraph;
 
 public class Face
 {
+    public enum BoundaryType { Inside = 0, Left = -1, Right = 1, Outside = 2 }
+
     public Voxel[] Voxels;
     public Vector3Int Index;
     public Vector3 Center;
@@ -24,22 +26,30 @@ public class Face
 
     public bool IsActive => Voxels.Count(v => v != null && v.IsActive) == 2;
 
-    public Vector3 Normal
+    public BoundaryType Boundary
     {
         get
         {
             bool left = Voxels[0] != null && Voxels[0].IsActive;
             bool right = Voxels[1] != null && Voxels[1].IsActive;
 
-            int f;
-            if (!left && right) f = -1;
-            else if (left && !right) f = 1;
-            else f = 0;
+            if (!left && right) return BoundaryType.Left;
+            if (left && !right) return BoundaryType.Right;
+            if (left && right) return BoundaryType.Inside;
+            return BoundaryType.Outside;
+        }
+    }
+
+    public Vector3 Normal
+    {
+        get
+        {
+            int f = (int)Boundary;
+            if (Boundary == BoundaryType.Outside) f = 0;
 
             if (Index.y == 0 && Direction == Axis.Y)
             {
-                if (!Voxels[1].IsActive) f = 1;
-                else f = 0;
+                f = Boundary == BoundaryType.Outside ? 1 : 0;
             }
 
             switch (Direction)
@@ -62,11 +72,10 @@ public class Face
         {
             if (Index.y == 0 && Direction == Axis.Y)
             {
-                if (!Voxels[1].IsActive) return true;
-                return false;
+                return Boundary == BoundaryType.Outside;
             }
 
-            return Voxels.Count(v => v != null && v.IsActive) == 1;
+            return Boundary == BoundaryType.Left || Boundary == BoundaryType.Right;
         }
     }
 
