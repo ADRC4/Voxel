@@ -8,7 +8,7 @@ using UnityEngine;
 public class Edge
 {
     public Vector3Int Index;
-    public Normal Direction;
+    public Axis Direction;
     public Vector3 Center;
     public Voxel[] Voxels;
     public Face[] Faces;
@@ -16,7 +16,7 @@ public class Edge
 
     Grid3d _grid;
 
-    public Edge(int x, int y, int z, Normal direction, Grid3d grid)
+    public Edge(int x, int y, int z, Axis direction, Grid3d grid)
     {
         _grid = grid;
         Index = new Vector3Int(x, y, z);
@@ -34,11 +34,11 @@ public class Edge
 
         switch (Direction)
         {
-            case Normal.X:
+            case Axis.X:
                 return _grid.Corner + new Vector3(x + 0.5f, y, z) * _grid.VoxelSize;
-            case Normal.Y:
+            case Axis.Y:
                 return _grid.Corner + new Vector3(x, y + 0.5f, z) * _grid.VoxelSize;
-            case Normal.Z:
+            case Axis.Z:
                 return _grid.Corner + new Vector3(x, y, z + 0.5f) * _grid.VoxelSize;
             default:
                 throw new Exception("Wrong direction.");
@@ -53,7 +53,7 @@ public class Edge
 
         switch (Direction)
         {
-            case Normal.X:
+            case Axis.X:
                 return new[]
                 {
                    (z == 0 || y == 0) ? null : _grid.Voxels[x, y - 1, z - 1],
@@ -61,7 +61,7 @@ public class Edge
                    (z == 0 || y == _grid.Size.y) ? null : _grid.Voxels[x, y, z - 1],
                    (z == _grid.Size.z || y == _grid.Size.y) ? null : _grid.Voxels[x, y, z]
                  };
-            case Normal.Y:
+            case Axis.Y:
                 return new[]
                 {
                    (x == 0 || z == 0) ? null : _grid.Voxels[x - 1, y, z - 1],
@@ -69,7 +69,7 @@ public class Edge
                    (x == 0 || z == _grid.Size.z) ? null : _grid.Voxels[x - 1, y, z],
                    (x == _grid.Size.x || z == _grid.Size.z) ? null : _grid.Voxels[x, y, z]
                 };
-            case Normal.Z:
+            case Axis.Z:
                 return new[]
                 {
                    (x == 0 || y == 0) ? null : _grid.Voxels[x - 1, y - 1, z],
@@ -90,7 +90,7 @@ public class Edge
 
         switch (Direction)
         {
-            case Normal.X:
+            case Axis.X:
                 return new[]
                 {
                     y == 0 ? Voxels[2]?.Faces[2] : Voxels[0]?.Faces[3],
@@ -98,7 +98,7 @@ public class Edge
                     z == 0 ? Voxels[1]?.Faces[4] : Voxels[0]?.Faces[5],
                     z == 0 ? Voxels[3]?.Faces[4] : Voxels[2]?.Faces[5],
                 };
-            case Normal.Y:
+            case Axis.Y:
                 return new[]
                 {
                     x == 0 ? Voxels[1]?.Faces[0] : Voxels[0]?.Faces[1],
@@ -106,7 +106,7 @@ public class Edge
                     z == 0 ? Voxels[2]?.Faces[4] : Voxels[0]?.Faces[5],
                     z == 0 ? Voxels[3]?.Faces[4] : Voxels[1]?.Faces[5],
                 };
-            case Normal.Z:
+            case Axis.Z:
                 return new[]
                 {
                     x == 0 ? Voxels[1]?.Faces[0] : Voxels[0]?.Faces[1],

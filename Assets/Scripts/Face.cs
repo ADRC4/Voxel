@@ -11,10 +11,11 @@ public class Face
     public Voxel[] Voxels;
     public Vector3Int Index;
     public Vector3 Center;
-    public Normal Direction;
+    public Axis Direction;
 
     public Edge[] Edges => GetEdges();
     public Corner[] Corners => GetCorners();
+
     // public float NormalizedDistance = 0f;
     // public Mesh Geometry;
 
@@ -23,16 +24,53 @@ public class Face
 
     public bool IsActive => Voxels.Count(v => v != null && v.IsActive) == 2;
 
+    public Vector3 Normal
+    {
+        get
+        {
+            bool left = Voxels[0] != null && Voxels[0].IsActive;
+            bool right = Voxels[1] != null && Voxels[1].IsActive;
+
+            int f;
+            if (!left && right) f = -1;
+            else if (left && !right) f = 1;
+            else f = 0;
+
+            if (Index.y == 0 && Direction == Axis.Y)
+            {
+                if (!Voxels[1].IsActive) f = 1;
+                else f = 0;
+            }
+
+            switch (Direction)
+            {
+                case Axis.X:
+                    return Vector3.right * f;
+                case Axis.Y:
+                    return Vector3.up * f;
+                case Axis.Z:
+                    return Vector3.forward * f;
+                default:
+                    throw new Exception("Wrong direction.");
+            }
+        }
+    }
+
     public bool IsClimbable
     {
         get
         {
-            if (Index.y == 0 && Direction == Normal.Y) return false;
+            if (Index.y == 0 && Direction == Axis.Y)
+            {
+                if (!Voxels[1].IsActive) return true;
+                return false;
+            }
+
             return Voxels.Count(v => v != null && v.IsActive) == 1;
         }
     }
 
-    public Face(int x, int y, int z, Normal direction, Grid3d grid)
+    public Face(int x, int y, int z, Axis direction, Grid3d grid)
     {
         _grid = grid;
         Index = new Vector3Int(x, y, z);
@@ -66,11 +104,11 @@ public class Face
 
         switch (Direction)
         {
-            case Normal.X:
+            case Axis.X:
                 return _grid.Corner + new Vector3(x, y + 0.5f, z + 0.5f) * _grid.VoxelSize;
-            case Normal.Y:
+            case Axis.Y:
                 return _grid.Corner + new Vector3(x + 0.5f, y, z + 0.5f) * _grid.VoxelSize;
-            case Normal.Z:
+            case Axis.Z:
                 return _grid.Corner + new Vector3(x + 0.5f, y + 0.5f, z) * _grid.VoxelSize;
             default:
                 throw new Exception("Wrong direction.");
@@ -85,19 +123,19 @@ public class Face
 
         switch (Direction)
         {
-            case Normal.X:
+            case Axis.X:
                 return new[]
                 {
                    x == 0 ? null : _grid.Voxels[x - 1, y, z],
                    x == _grid.Size.x ? null : _grid.Voxels[x, y, z]
                 };
-            case Normal.Y:
+            case Axis.Y:
                 return new[]
                 {
                    y == 0 ? null : _grid.Voxels[x, y - 1, z],
                    y == _grid.Size.y ? null : _grid.Voxels[x, y, z]
                 };
-            case Normal.Z:
+            case Axis.Z:
                 return new[]
                 {
                    z == 0 ? null : _grid.Voxels[x, y, z - 1],
@@ -116,7 +154,7 @@ public class Face
 
         switch (Direction)
         {
-            case Normal.X:
+            case Axis.X:
                 return new[]
                 {
                   _grid.Edges[1][x, y, z],
@@ -124,7 +162,7 @@ public class Face
                   _grid.Edges[2][x, y, z],
                   _grid.Edges[2][x, y + 1, z]
                 };
-            case Normal.Y:
+            case Axis.Y:
                 return new[]
                 {
                   _grid.Edges[0][x, y, z],
@@ -132,7 +170,7 @@ public class Face
                   _grid.Edges[2][x, y, z],
                   _grid.Edges[2][x + 1, y, z]
                 };
-            case Normal.Z:
+            case Axis.Z:
                 return new[]
                {
                   _grid.Edges[0][x, y, z],
@@ -153,7 +191,7 @@ public class Face
 
         switch (Direction)
         {
-            case Normal.X:
+            case Axis.X:
                 return new[]
                 {
                  _grid.Corners[x, y, z],
@@ -161,7 +199,7 @@ public class Face
                  _grid.Corners[x, y, z + 1],
                  _grid.Corners[x, y + 1, z + 1]
                 };
-            case Normal.Y:
+            case Axis.Y:
                 return new[]
                 {
                  _grid.Corners[x, y, z],
@@ -169,7 +207,7 @@ public class Face
                  _grid.Corners[x, y, z + 1],
                  _grid.Corners[x + 1, y, z + 1]
                 };
-            case Normal.Z:
+            case Axis.Z:
                 return new[]
 {
                  _grid.Corners[x, y, z],

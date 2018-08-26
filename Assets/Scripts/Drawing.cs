@@ -179,19 +179,19 @@ class Drawing : MonoBehaviour
         return mesh;
     }
 
-    public static Mesh MakeFace(Vector3 center, Normal direction, float size, float u, float v = 0)
+    public static Mesh MakeFace(Vector3 center, Axis direction, float size, float u, float v = 0)
     {
         Quaternion rotation = Quaternion.identity;
 
         switch (direction)
         {
-            case Normal.X:
+            case Axis.X:
                 rotation = Quaternion.Euler(0, 90, 0);
                 break;
-            case Normal.Y:
+            case Axis.Y:
                 rotation = Quaternion.Euler(90, 0, 0);
                 break;
-            case Normal.Z:
+            case Axis.Z:
                 rotation = Quaternion.Euler(0, 0, 0);
                 break;
         }

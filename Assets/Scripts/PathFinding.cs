@@ -30,6 +30,11 @@ public class PathFinding : MonoBehaviour
     {
         if (_grid == null) return;
         //   Drawing.DrawMesh(false, _grid.Mesh);
+
+        foreach(var face in _grid.GetFaces())
+        {
+            Debug.DrawRay(face.Center, face.Normal * 0.2f, Color.white);
+        }
     }
 
     void OnGUI()

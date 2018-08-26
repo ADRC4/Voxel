@@ -6,7 +6,7 @@ using System.Diagnostics;
 using QuickGraph;
 using Debug = UnityEngine.Debug;
 
-public enum Normal { X, Y, Z };
+public enum Axis { X, Y, Z };
 
 public class Grid3d
 {
@@ -92,7 +92,7 @@ public class Grid3d
             for (int y = 0; y < Size.y; y++)
                 for (int x = 0; x < Size.x + 1; x++)
                 {
-                    Faces[0][x, y, z] = new Face(x, y, z, Normal.X, this);
+                    Faces[0][x, y, z] = new Face(x, y, z, Axis.X, this);
                 }
 
         Faces[1] = new Face[Size.x, Size.y + 1, Size.z];
@@ -101,7 +101,7 @@ public class Grid3d
             for (int y = 0; y < Size.y + 1; y++)
                 for (int x = 0; x < Size.x; x++)
                 {
-                    Faces[1][x, y, z] = new Face(x, y, z, Normal.Y, this);
+                    Faces[1][x, y, z] = new Face(x, y, z, Axis.Y, this);
                 }
 
         Faces[2] = new Face[Size.x, Size.y, Size.z + 1];
@@ -110,35 +110,35 @@ public class Grid3d
             for (int y = 0; y < Size.y; y++)
                 for (int x = 0; x < Size.x; x++)
                 {
-                    Faces[2][x, y, z] = new Face(x, y, z, Normal.Z, this);
+                    Faces[2][x, y, z] = new Face(x, y, z, Axis.Z, this);
                 }
 
         // make edges
-        Edges[0] = new Edge[Size.x + 1, Size.y + 1, Size.z];
+        Edges[2] = new Edge[Size.x + 1, Size.y + 1, Size.z];
 
         for (int z = 0; z < Size.z; z++)
             for (int y = 0; y < Size.y + 1; y++)
                 for (int x = 0; x < Size.x + 1; x++)
                 {
-                    Edges[0][x, y, z] = new Edge(x, y, z, Normal.Z, this);
+                    Edges[2][x, y, z] = new Edge(x, y, z, Axis.Z, this);
                 }
 
-        Edges[1] = new Edge[Size.x, Size.y + 1, Size.z + 1];
+        Edges[0] = new Edge[Size.x, Size.y + 1, Size.z + 1];
 
         for (int z = 0; z < Size.z + 1; z++)
             for (int y = 0; y < Size.y + 1; y++)
                 for (int x = 0; x < Size.x; x++)
                 {
-                    Edges[1][x, y, z] = new Edge(x, y, z, Normal.X, this);
+                    Edges[0][x, y, z] = new Edge(x, y, z, Axis.X, this);
                 }
 
-        Edges[2] = new Edge[Size.x + 1, Size.y, Size.z + 1];
+        Edges[1] = new Edge[Size.x + 1, Size.y, Size.z + 1];
 
         for (int z = 0; z < Size.z + 1; z++)
             for (int y = 0; y < Size.y; y++)
                 for (int x = 0; x < Size.x + 1; x++)
                 {
-                    Edges[2][x, y, z] = new Edge(x, y, z, Normal.Y, this);
+                    Edges[1][x, y, z] = new Edge(x, y, z, Axis.Y, this);
                 }
 
         // calculate
