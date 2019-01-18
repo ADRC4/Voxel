@@ -2,7 +2,12 @@
 
 public class MainCamera : MonoBehaviour
 {
-    Vector3 _target = Vector3.zero;
+    Vector3 _target;
+
+    void Start()
+    {
+        _target = transform.forward * 2;
+    }
 
     void Update()
     {
@@ -17,8 +22,9 @@ public class MainCamera : MonoBehaviour
             float right = -Input.GetAxis("Mouse X") * panSpeed;
             float up = -Input.GetAxis("Mouse Y") * panSpeed;
 
-            var vector = new Vector3(right, up, 0);
-            transform.position += transform.rotation * vector;
+            var vector = transform.rotation * new Vector3(right, up, 0);
+            transform.position += vector;
+            _target += vector;
         }
         else if (rotate)
         {

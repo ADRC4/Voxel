@@ -1,9 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using BriefFiniteElementNet;
-using BriefFiniteElementNet.Elements;
-using System;
 
 public class Voxel
 {
@@ -25,23 +22,28 @@ public class Voxel
         IsActive = true;
     }
 
-    internal bool IsInside(MeshCollider collider)
+    internal bool IsInside(IEnumerable<MeshCollider> colliders)
     {
-        if (collider.convex)
-            throw new ArgumentException("Collider must be concave mesh.");
-
+        Physics.queriesHitBackfaces = true;
         var point = Center;
-        RaycastHit hit;
-        int hits = 0;
+        var sortedHits = new Dictionary<Collider, int>();
+        foreach (var collider in colliders)
+            sortedHits.Add(collider, 0);
 
-        while (collider.Raycast(new Ray(point, Vector3.forward), out hit, float.MaxValue))
+        while (Physics.Raycast(new Ray(point, Vector3.forward), out RaycastHit hit))
         {
-            point = hit.point + Vector3.forward * 0.0001f;
-            hits++;
+            var collider = hit.collider;
+
+            if (sortedHits.ContainsKey(collider))
+                sortedHits[collider]++;
+
+            point = hit.point + Vector3.forward * 0.00001f;
         }
 
-        return hits % 2 != 0;
+        bool isInside = sortedHits.Any(kv => kv.Value % 2 != 0);
+        return isInside;
     }
+
 
     public IEnumerable<Corner> GetCorners()
     {
@@ -96,29 +98,5 @@ public class Voxel
 
         if (z != 0) yield return _grid.Voxels[x, y, z - 1];
         if (z != s.z - 1) yield return _grid.Voxels[x, y, z + 1];
-    }
-
-    public IEnumerable<Tetrahedral> MakeTetrahedrons()
-    {
-        var c = GetCorners().ToArray();
-
-        var t = new[,]
-        {
-           { c[0], c[1], c[2], c[4]},
-           { c[3], c[1], c[2], c[7]},
-           { c[1], c[2], c[4], c[7]},
-           { c[4], c[5], c[7], c[1]},
-           { c[4], c[7], c[6], c[2]}
-        };
-
-        for (int i = 0; i < 5; i++)
-        {
-            var tetra = new Tetrahedral() { E = 210e9, Nu = 0.33 };
-
-            for (int j = 0; j < 4; j++)
-                tetra.Nodes[j] = t[i, j];
-
-            yield return tetra;
-        }
     }
 }

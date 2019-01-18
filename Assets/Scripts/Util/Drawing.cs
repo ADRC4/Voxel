@@ -1,32 +1,43 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using static UnityEngine.Mathf;
 
 class Drawing : MonoBehaviour
 {
     [SerializeField]
-    Mesh _box;
-    [SerializeField]
-    Mesh _cylinder;
-    [SerializeField]
     Material _opaque;
     [SerializeField]
     Material _transparent;
-    [SerializeField]
-    Material _black;
 
     static Drawing _instance;
+    Material _black;
     static Gradient _gradient = new Gradient();
+
+    //Mesh _box;
+    static Mesh _unitBox;
+    Mesh _cylinder;
 
     public static System.Random Random = new System.Random(42);
 
-    static Mesh _unitBox;
 
     void Awake()
     {
         _instance = this;
-        //_unitFace = UnitFace(0);
 
+        _unitBox = UnitBox();
+        _cylinder = Primitive(PrimitiveType.Cylinder);
+
+        var texture = GradientTexture();
+        _opaque.mainTexture = texture;
+        _transparent.mainTexture = texture;
+
+        _black = new Material(Shader.Find("Unlit/Transparent"));
+        _black.color = Color.black;
+    }
+
+    static Texture2D GradientTexture()
+    {
         var gck = new GradientColorKey[2];
         var gak = new GradientAlphaKey[0];
         gck[0].color = Color.green;
@@ -49,18 +60,36 @@ class Drawing : MonoBehaviour
 
         texture.SetPixel(0, 1, Color.yellow);
         texture.SetPixel(1, 1, Color.gray);
-
         texture.Apply();
 
-        _opaque.mainTexture = texture;
-        _transparent.mainTexture = texture;
-        _unitBox = new Mesh();
-        _unitBox.vertices = _box.vertices;
-        _unitBox.normals = _box.normals;
-        _unitBox.uv = _box.uv.Select(_ => new Vector2(1.5f / 255f, 0.75f)).ToArray();
-        _unitBox.triangles = _box.triangles;
-        _unitBox.tangents = _box.tangents;
+        return texture;
     }
+
+    static Mesh UnitBox()
+    {
+        var cube = Primitive(PrimitiveType.Cube);
+
+        var box = new Mesh
+        {
+            vertices = cube.vertices,
+            normals = cube.normals,
+            uv = cube.uv.Select(_ => new Vector2(1.5f / 255f, 0.75f)).ToArray(),
+            triangles = cube.triangles,
+            tangents = cube.tangents
+        };
+
+        return box;
+    }
+
+    static Mesh Primitive(PrimitiveType primitive)
+    {
+        var go = GameObject.CreatePrimitive(primitive);
+        var mesh = go.GetComponent<MeshFilter>().sharedMesh;
+        Destroy(go);
+        return mesh;
+    }
+
+    // drawing
 
     public static void DrawCube(Vector3 center, float size)
     {
@@ -196,22 +225,11 @@ class Drawing : MonoBehaviour
                 break;
         }
 
-        //var f = new[]
-        //{
-        //    0,1,2,3,
-        //    7,6,5,4
-        //};
-
         var tris = new[]
         {
             0,1,2, 0,2,3,
             6,5,4, 7,6,4
         };
-
-        //var l = new[]
-        //{
-        //    0,1,2,3,0
-        //};
 
         float s = size * 0.5f;
 
@@ -247,10 +265,74 @@ class Drawing : MonoBehaviour
 
         mesh.SetIndices(tris, MeshTopology.Triangles, 0);
         //mesh.SetIndices(l, MeshTopology.LineStrip, 1);
-        // mesh.SetIndices(f, MeshTopology.Quads, 0);
 
         mesh.RecalculateBounds();
         // mesh.RecalculateTangents();
         return mesh;
+    }
+
+
+    // primitives
+
+    static Mesh Quad()
+    {
+        const float s = 0.5f;
+
+        var v = new[]
+        {
+            new Vector3(-s,-s),
+            new Vector3(s,-s),
+            new Vector3(s,s),
+            new Vector3(-s,s)
+        };
+
+        var quad = new Mesh()
+        {
+            vertices = v,
+            normals = Enumerable.Repeat(-Vector3.up, 4).ToArray(),
+            subMeshCount = 2
+        };
+
+        quad.SetIndices(new[] { 0, 1, 2, 3 }, MeshTopology.Quads, 0);
+        quad.SetIndices(new[] { 0, 1, 2, 3, 0 }, MeshTopology.LineStrip, 1);
+        return quad;
+    }
+
+    static Mesh Circle()
+    {
+        const int sides = 32;
+        const float step = (PI * 2) / sides;
+        var vertices = new Vector3[sides + 1];
+
+        for (int i = 0; i < sides; i++)
+        {
+            float angle = step * i;
+            float x = Cos(angle);
+            float y = Sin(angle);
+            vertices[i + 1] = new Vector3(x, y, 0) * 0.5f;
+        }
+
+        var triangles = new int[sides * 3];
+
+        for (int i = 0; i < sides; i++)
+        {
+            int j = i == sides - 1 ? 0 : i + 1;
+            triangles[i * 3 + 1] = i + 1;
+            triangles[i * 3 + 2] = j + 1;
+        }
+
+        var circle = new Mesh()
+        {
+            vertices = vertices,
+            triangles = triangles,
+            normals = Enumerable.Repeat(-Vector3.up, sides + 1).ToArray(),
+            subMeshCount = 2
+        };
+
+        var perimeter = Enumerable.Range(1, sides + 1).ToArray();
+        perimeter[sides] = 1;
+
+        circle.SetIndices(perimeter, MeshTopology.LineStrip, 1);
+        return circle;
     }
 }

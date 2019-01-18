@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using BriefFiniteElementNet;
 using System.Diagnostics;
 using QuickGraph;
 using Debug = UnityEngine.Debug;
@@ -22,21 +21,6 @@ public class Grid3d
 
     public Mesh[] Mesh;
 
-    private float _displacement = 0;
-
-    public float DisplacementScale
-    {
-        get { return _displacement; }
-        set
-        {
-            if (value != _displacement)
-            {
-                _displacement = value;
-                MakeVoxelMesh();
-            }
-        }
-    }
-
     public static Grid3d MakeGridWithVoids(IEnumerable<MeshCollider> voids, float voxelSize)
     {
         var bbox = new Bounds();
@@ -49,14 +33,12 @@ public class Grid3d
         return grid;
     }
 
-    public Grid3d(Bounds bbox, float voxelSize = 1.0f, float displacement = 10f)
+    public Grid3d(Bounds bbox, float voxelSize = 1.0f)
     {
-        var watch = new Stopwatch();
-        watch.Start();
+        var watch = Stopwatch.StartNew();
 
         Bbox = bbox;
         VoxelSize = voxelSize;
-        _displacement = displacement;
 
         bbox.min = new Vector3(bbox.min.x, 0, bbox.min.z);
         var sizef = bbox.size / voxelSize;
@@ -141,12 +123,7 @@ public class Grid3d
                     Edges[1][x, y, z] = new Edge(x, y, z, Axis.Y, this);
                 }
 
-        // calculate
-        //Analysis();
-
-        // Debug.Log($"Time to generate grid: {watch.ElapsedMilliseconds} ms");
-
-        // Debug.Log($"Grid size: {Size} units = {Size.x * Size.y * Size.z} voxels.");
+        Debug.Log($"Grid took: {watch.ElapsedMilliseconds} ms to create.\r\nGrid size: {Size}, {Size.x * Size.y * Size.z} voxels.");
     }
 
     public Grid3d Clone()
@@ -156,12 +133,8 @@ public class Grid3d
 
     public void AddVoids(IEnumerable<MeshCollider> voids)
     {
-        Physics.queriesHitBackfaces = true;
-
         foreach (var voxel in GetVoxels())
-        {
-            voxel.IsActive = !voids.Any(voxel.IsInside);
-        }
+            voxel.IsActive = !voxel.IsInside(voids);
     }
 
     public IEnumerable<Voxel> GetVoxels()
@@ -171,6 +144,16 @@ public class Grid3d
                 for (int x = 0; x < Size.x; x++)
                 {
                     yield return Voxels[x, y, z];
+                }
+    }
+
+    public IEnumerable<Corner> GetCorners()
+    {
+        for (int z = 0; z < Size.z + 1; z++)
+            for (int y = 0; y < Size.y + 1; y++)
+                for (int x = 0; x < Size.x + 1; x++)
+                {
+                    yield return Corners[x, y, z];
                 }
     }
 
@@ -217,67 +200,5 @@ public class Grid3d
         Dictionary<Voxel, int> components = new Dictionary<Voxel, int>();
         var count = QuickGraph.Algorithms.AlgorithmExtensions.ConnectedComponents(graph, components);
         return count;
-    }
-
-    public void Analysis()
-    {
-        // analysis model
-        var model = new Model();
-
-        var nodes = GetVoxels()
-             .Where(b => b.IsActive)
-             .SelectMany(v => v.GetCorners())
-             .Distinct()
-             .ToArray();
-
-
-        var elements = GetVoxels()
-             .Where(b => b.IsActive)
-             .SelectMany(v => v.MakeTetrahedrons())
-             .ToArray();
-
-        model.Nodes.Add(nodes);
-        model.Elements.Add(elements);
-
-        model.Solve();
-
-        // analysis results
-        foreach (var node in nodes)
-        {
-            var d = node
-           .GetNodalDisplacement(LoadCase.DefaultLoadCase)
-           .Displacements;
-
-            node.Displacement = new Vector3((float)d.X, (float)d.Z, (float)d.Y);
-            var length = node.Displacement.magnitude;
-
-            foreach (var voxel in node.GetConnectedVoxels())
-                voxel.Value += length;
-        }
-
-        var activeVoxels = GetVoxels().Where(v => v.IsActive);
-
-        foreach (var voxel in activeVoxels)
-            voxel.Value /= voxel.GetCorners().Count();
-
-        var min = activeVoxels.Min(v => v.Value);
-        var max = activeVoxels.Max(v => v.Value);
-
-        foreach (var voxel in activeVoxels)
-            voxel.Value = Mathf.InverseLerp(min, max, voxel.Value);
-    }
-
-    public void MakeVoxelMesh()
-    {
-        Mesh = GetVoxels()
-            .Where(v => v.IsActive)
-            .Select(v =>
-        {
-            var corners = v.GetCorners()
-                    .Select(c => c.DisplacedPosition)
-                    .ToArray();
-
-            return Drawing.MakeTwistedBox(corners, v.Value, null);
-        }).ToArray();
     }
 }

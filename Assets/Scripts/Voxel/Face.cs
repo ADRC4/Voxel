@@ -30,8 +30,8 @@ public class Face
     {
         get
         {
-            bool left = Voxels[0] != null && Voxels[0].IsActive;
-            bool right = Voxels[1] != null && Voxels[1].IsActive;
+            bool left = Voxels[0]?.IsActive == true;
+            bool right = Voxels[1]?.IsActive == true;
 
             if (!left && right) return BoundaryType.Left;
             if (left && !right) return BoundaryType.Right;
