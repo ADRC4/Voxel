@@ -18,11 +18,7 @@ public class Face
     public Edge[] Edges => GetEdges();
     public Corner[] Corners => GetCorners();
 
-    // public float NormalizedDistance = 0f;
-    // public Mesh Geometry;
-
     Grid3d _grid;
-    // public FrameElement2Node Frame;
 
     public bool IsActive => Voxels.Count(v => v != null && v.IsActive) == 2;
 

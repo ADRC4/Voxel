@@ -1,9 +1,8 @@
 ﻿using System.Collections;
 using System.Linq;
-using System.Threading.Tasks;
+using System.Collections.Generic;
 using UnityEngine;
 using BriefFiniteElementNet;
-using System.Collections.Generic;
 using BriefFiniteElementNet.Elements;
 
 public class StructuralAnalysis : MonoBehaviour
@@ -24,7 +23,7 @@ public class StructuralAnalysis : MonoBehaviour
     GameObject _voids;
     Mesh[] _meshes;
 
-    void Awake()
+    void Start()
     {
         _voids = GameObject.Find("Voids");
     }
@@ -43,9 +42,8 @@ public class StructuralAnalysis : MonoBehaviour
         _voxelSize = GUI.TextField(new Rect(s, s * i++, 100, 20), _voxelSize);
 
         if (GUI.Button(new Rect(s, s * i++, 100, 20), "Generate"))
-        {
             MakeGrid();
-        }
+
         if (_toggleVoids != GUI.Toggle(new Rect(s, s * i++, 100, 20), _toggleVoids, "Show voids"))
         {
             _toggleVoids = !_toggleVoids;
@@ -58,7 +56,6 @@ public class StructuralAnalysis : MonoBehaviour
 
         if (_grid != null)
             _tempDisplacement = GUI.HorizontalSlider(new Rect(s, s * i++, 100, 20), _tempDisplacement, 0, 500);
-
     }
 
     void Update()
@@ -101,7 +98,7 @@ public class StructuralAnalysis : MonoBehaviour
 
         var elements = _grid.GetVoxels()
              .Where(b => b.IsActive)
-             .SelectMany(v => MakeTetrahedrons(v))
+             .SelectMany(v => MakeTetrahedra(v))
              .ToArray();
 
         model.Nodes.Add(nodes);
@@ -149,7 +146,7 @@ public class StructuralAnalysis : MonoBehaviour
             }).ToArray();
     }
 
-    public IEnumerable<Tetrahedral> MakeTetrahedrons(Voxel voxel)
+    public IEnumerable<Tetrahedral> MakeTetrahedra(Voxel voxel)
     {
         var c = voxel.GetCorners().ToArray();
 

@@ -12,7 +12,7 @@ public class Edge
     public Vector3 Center;
     public Voxel[] Voxels;
     public Face[] Faces;
-    public Face[] ClimbableFaces => Faces.Where(f => f != null && f.IsClimbable).ToArray();
+    public Face[] ClimbableFaces => Faces.Where(f => f?.IsClimbable == true).ToArray();
 
     Grid3d _grid;
 
@@ -24,6 +24,19 @@ public class Edge
         Center = GetCenter();
         Voxels = GetVoxels();
         Faces = GetFaces();
+    }
+
+    public Vector3 Normal
+    {
+        get
+        {
+            Vector3 normal = Vector3.zero;
+
+            foreach (var face in Faces.Where(f => f != null))
+                normal += face.Normal;
+
+            return normal.normalized;
+        }
     }
 
     Vector3 GetCenter()

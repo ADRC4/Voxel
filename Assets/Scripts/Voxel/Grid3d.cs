@@ -19,7 +19,7 @@ public class Grid3d
     public Vector3 Corner;
     public Bounds Bbox;
 
-    public Mesh[] Mesh;
+   // public Mesh[] Mesh;
 
     public static Grid3d MakeGridWithVoids(IEnumerable<MeshCollider> voids, float voxelSize)
     {

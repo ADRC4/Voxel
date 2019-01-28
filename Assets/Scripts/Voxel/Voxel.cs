@@ -25,6 +25,7 @@ public class Voxel
     internal bool IsInside(IEnumerable<MeshCollider> colliders)
     {
         Physics.queriesHitBackfaces = true;
+
         var point = Center;
         var sortedHits = new Dictionary<Collider, int>();
         foreach (var collider in colliders)

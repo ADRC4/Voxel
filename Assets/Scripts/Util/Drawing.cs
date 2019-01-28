@@ -32,7 +32,7 @@ class Drawing : MonoBehaviour
         _opaque.mainTexture = texture;
         _transparent.mainTexture = texture;
 
-        _black = new Material(Shader.Find("Unlit/Transparent"));
+        _black = new Material(Shader.Find("Unlit/Color"));
         _black.color = Color.black;
     }
 
@@ -260,11 +260,9 @@ class Drawing : MonoBehaviour
             normals = new[] { n, n, n, n, -n, -n, -n, -n },
             uv = Enumerable.Repeat(new Vector2(u, v), vertices.Length).ToArray(),
             indexFormat = UnityEngine.Rendering.IndexFormat.UInt32,
-            // subMeshCount = 2,
         };
 
         mesh.SetIndices(tris, MeshTopology.Triangles, 0);
-        //mesh.SetIndices(l, MeshTopology.LineStrip, 1);
 
         mesh.RecalculateBounds();
         // mesh.RecalculateTangents();

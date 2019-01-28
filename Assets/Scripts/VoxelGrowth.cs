@@ -6,28 +6,54 @@ using QuickGraph;
 
 public class VoxelGrowth : MonoBehaviour
 {
+    // UI
     [SerializeField]
     GUISkin _skin;
 
-    Grid3d _grid = null;
-    GameObject _voids;
     bool _toggleVoids = true;
     bool _toggleTransparency = false;
     string _voxelSize = "0.8";
+    Rect _windowRect = new Rect(20, 20, 150, 160);
+
+    // grid
+    Grid3d _grid = null;
+    GameObject _voids;
+    Mesh[] _meshes;
 
     List<Voxel> _orderedVoxels = new List<Voxel>();
     int _animatedCount;
+    Coroutine _animation;
 
-    private void Awake()
+    private void Start()
     {
         _voids = GameObject.Find("Voids");
     }
 
-    private void Start()
+    void OnGUI()
     {
-        MakeGrid();
-        ToggleVoids();
-        StartCoroutine(GrowthAnimation());
+        GUI.skin = _skin;
+        _windowRect = GUI.Window(0, _windowRect, WindowFunction, string.Empty);
+    }
+
+    void WindowFunction(int windowID)
+    {
+        int i = 1;
+        int s = 25;
+
+        _voxelSize = GUI.TextField(new Rect(s, s * i++, 100, 20), _voxelSize);
+
+        if (GUI.Button(new Rect(s, s * i++, 100, 20), "Generate"))
+            GrowVoxels();
+
+        if (_toggleVoids != GUI.Toggle(new Rect(s, s * i++, 100, 20), _toggleVoids, "Show voids"))
+        {
+            _toggleVoids = !_toggleVoids;
+
+            foreach (var r in _voids.GetComponentsInChildren<Renderer>())
+                r.enabled = _toggleVoids;
+        }
+
+        _toggleTransparency = GUI.Toggle(new Rect(s, s * i++, 100, 20), _toggleTransparency, "Transparent");
     }
 
     void Update()
@@ -38,25 +64,13 @@ public class VoxelGrowth : MonoBehaviour
             Drawing.DrawCube(voxel.Center, _grid.VoxelSize);
     }
 
-    void OnGUI()
+    void GrowVoxels()
     {
-        int i = 1;
-        int s = 25;
-        GUI.skin = _skin;
+        _animatedCount = 0;
+        MakeGrid();
 
-        _voxelSize = GUI.TextField(new Rect(s, s * i++, 100, 20), _voxelSize);
-
-        if (GUI.Button(new Rect(s, s * i++, 100, 20), "Generate"))
-        {
-            MakeGrid();
-        }
-
-        if (_toggleVoids != GUI.Toggle(new Rect(s, s * i++, 100, 20), _toggleVoids, "Show voids"))
-        {
-            ToggleVoids();
-        }
-
-        _toggleTransparency = GUI.Toggle(new Rect(s, s * i++, 100, 20), _toggleTransparency, "Transparent");
+        if (_animation != null) StopCoroutine(_animation);
+        _animation = StartCoroutine(GrowthAnimation());
     }
 
     void MakeGrid()
@@ -77,9 +91,8 @@ public class VoxelGrowth : MonoBehaviour
                             .Where(v => v.IsActive && v.Index.y == 0)
                             .ToList();
 
-        Vector3 bottomCentroid = bottomSlab
-                                .Select(v => v.Center)
-                                .Average();
+        var bottomCentroid = _grid.Bbox.center;
+        bottomCentroid.y = 0;
 
         var startVoxel = bottomSlab.MinBy(v => (v.Center - bottomCentroid).sqrMagnitude);
         var shortest = QuickGraph.Algorithms.AlgorithmExtensions.ShortestPathsDijkstra(graph, e => 1.0, startVoxel);
@@ -100,15 +113,7 @@ public class VoxelGrowth : MonoBehaviour
         while (_animatedCount < _orderedVoxels.Count)
         {
             _animatedCount++;
-            yield return new WaitForSeconds(0.01f);
+            yield return new WaitForSeconds(0.001f);
         }
-    }
-
-    void ToggleVoids()
-    {
-        _toggleVoids = !_toggleVoids;
-
-        foreach (var r in _voids.GetComponentsInChildren<Renderer>())
-            r.enabled = _toggleVoids;
     }
 }

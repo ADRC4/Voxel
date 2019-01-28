@@ -6,56 +6,60 @@ using QuickGraph;
 
 public class PathFinding : MonoBehaviour
 {
-    Grid3d _grid = null;
-    GameObject _voids;
-    bool _toggleVoids = true;
-    bool _toggleTransparency = false;
-    string _voxelSize = "0.8";
-
+    // UI
     [SerializeField]
     GUISkin _skin;
 
-    private void Awake()
+    bool _toggleVoids = true;
+    bool _toggleTransparency = false;
+    string _voxelSize = "0.8";
+    Rect _windowRect = new Rect(20, 20, 150, 160);
+
+    // grid
+    Grid3d _grid = null;
+    GameObject _voids;
+    Mesh[] _meshes;
+
+    private void Start()
     {
         _voids = GameObject.Find("Voids");
     }
 
-    private void Start()
+    void OnGUI()
     {
-        MakeGrid();
-        ToggleVoids();
+        GUI.skin = _skin;
+        _windowRect = GUI.Window(0, _windowRect, WindowFunction, string.Empty);
+    }
+
+    void WindowFunction(int windowID)
+    {
+        int i = 1;
+        int s = 25;
+
+        _voxelSize = GUI.TextField(new Rect(s, s * i++, 100, 20), _voxelSize);
+
+        if (GUI.Button(new Rect(s, s * i++, 100, 20), "Generate"))
+            MakeGrid();
+
+        if (_toggleVoids != GUI.Toggle(new Rect(s, s * i++, 100, 20), _toggleVoids, "Show voids"))
+        {
+            _toggleVoids = !_toggleVoids;
+
+            foreach (var r in _voids.GetComponentsInChildren<Renderer>())
+                r.enabled = _toggleVoids;
+        }
+
+        _toggleTransparency = GUI.Toggle(new Rect(s, s * i++, 100, 20), _toggleTransparency, "Transparent");
     }
 
     void Update()
     {
         if (_grid == null) return;
-        //   Drawing.DrawMesh(false, _grid.Mesh);
 
-        foreach(var face in _grid.GetFaces())
-        {
-            Debug.DrawRay(face.Center, face.Normal * 0.2f, Color.white);
-        }
-    }
+        //foreach (var face in _grid.GetFaces())
+        //    Debug.DrawRay(face.Center, face.Normal * 0.2f, Color.white);
 
-    void OnGUI()
-    {
-        int i = 1;
-        int s = 25;
-        GUI.skin = _skin;
-
-        _voxelSize = GUI.TextField(new Rect(s, s * i++, 100, 20), _voxelSize);
-
-        if (GUI.Button(new Rect(s, s * i++, 100, 20), "Generate"))
-        {
-            MakeGrid();
-        }
-
-        if (_toggleVoids != GUI.Toggle(new Rect(s, s * i++, 100, 20), _toggleVoids, "Show voids"))
-        {
-            ToggleVoids();
-        }
-
-        _toggleTransparency = GUI.Toggle(new Rect(s, s * i++, 100, 20), _toggleTransparency, "Transparent");
+        Drawing.DrawMesh(_toggleTransparency, _meshes);
     }
 
     void MakeGrid()
@@ -91,12 +95,7 @@ public class PathFinding : MonoBehaviour
         var endPathFaces = new HashSet<Face>(endPath.SelectMany(e => new[] { e.Source, e.Target }));
 
         // create a mesh face for every outer face colored based on the path length (except a solid yellow path to end face)
-        var mesh = new Mesh()
-        {
-            indexFormat = UnityEngine.Rendering.IndexFormat.UInt32
-        };
-
-        var meshes = new List<CombineInstance>();
+        var faceMeshes = new List<CombineInstance>();
 
         foreach (var face in _grid.GetFaces().Where(f => f.IsClimbable))
         {
@@ -121,42 +120,42 @@ public class PathFinding : MonoBehaviour
                 faceMesh = Drawing.MakeFace(face.Center, face.Direction, _grid.VoxelSize, t);
             }
 
-            meshes.Add(new CombineInstance() { mesh = faceMesh });
+            faceMeshes.Add(new CombineInstance() { mesh = faceMesh });
         }
 
-        mesh.CombineMeshes(meshes.ToArray(), true, false, false);
-        GetComponent<MeshFilter>().mesh = mesh;
+        var mesh = new Mesh()
+        {
+            indexFormat = UnityEngine.Rendering.IndexFormat.UInt32
+        };
+
+        mesh.CombineMeshes(faceMeshes.ToArray(), true, false, false);
+
+        Mesh pathMesh = new Mesh();
 
         // draw a polyline for the start-end path
         {
             IEnumerable<TaggedEdge<Face, Edge>> path;
             if (shortest(end, out path))
             {
-                int vertexCount = mesh.vertexCount;
-                var vertices = new List<Vector3>(mesh.vertices);
+                float offset = 0.1f;
+                var vertices = new List<Vector3>();
 
                 var current = start;
-                vertices.Add(current.Center);
+                vertices.Add(current.Center + current.Normal * offset);
 
                 foreach (var edge in path)
                 {
-                    vertices.Add(edge.Tag.Center);
+                    vertices.Add(edge.Tag.Center + edge.Tag.Normal * offset);
                     current = edge.GetOtherVertex(current);
-                    vertices.Add(current.Center);
+                    vertices.Add(current.Center + current.Normal * offset);
                 }
 
-                mesh.SetVertices(vertices);
-                mesh.subMeshCount = 2;
-                mesh.SetIndices(Enumerable.Range(vertexCount, vertices.Count - vertexCount).ToArray(), MeshTopology.LineStrip, 1);
+                pathMesh.SetVertices(vertices);
+                pathMesh.subMeshCount = 2;
+                pathMesh.SetIndices(Enumerable.Range(0, vertices.Count).ToArray(), MeshTopology.LineStrip, 1);
             }
         }
-    }
 
-    void ToggleVoids()
-    {
-        _toggleVoids = !_toggleVoids;
-
-        foreach (var r in _voids.GetComponentsInChildren<Renderer>())
-            r.enabled = _toggleVoids;
+        _meshes = new[] { mesh, pathMesh };
     }
 }
