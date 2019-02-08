@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using QuickGraph;
+using QuickGraph.Algorithms;
+using System;
 
 public class PathFinding : MonoBehaviour
 {
@@ -56,7 +58,7 @@ public class PathFinding : MonoBehaviour
     {
         if (_grid == null) return;
 
-        //foreach (var face in _grid.GetFaces())
+        // foreach (var face in _grid.GetFaces())
         //    Debug.DrawRay(face.Center, face.Normal * 0.2f, Color.white);
 
         Drawing.DrawMesh(_toggleTransparency, _meshes);
@@ -83,13 +85,12 @@ public class PathFinding : MonoBehaviour
         var start = _grid.GetFaces().Where(f => f.IsClimbable).Skip(10).First();
 
         // calculate shortest path from start face to all boundary faces
-        var shortest = QuickGraph.Algorithms.AlgorithmExtensions.ShortestPathsDijkstra(graph, e => 1.0, start);
+        var shortest = graph.ShortestPathsDijkstra(e => 1.0, start);
 
         // select an end face to draw one specific path
         var end = _grid.GetFaces().Where(f => f.IsClimbable).Skip(200).First();
 
-        IEnumerable<TaggedEdge<Face, Edge>> endPath;
-        shortest(end, out endPath);
+        shortest(end, out var endPath);
 
         // unsorted distinct faces of the path from start to end faces
         var endPathFaces = new HashSet<Face>(endPath.SelectMany(e => new[] { e.Source, e.Target }));
@@ -101,8 +102,7 @@ public class PathFinding : MonoBehaviour
         {
             float t = 1;
 
-            IEnumerable<TaggedEdge<Face, Edge>> path;
-            if (shortest(face, out path))
+            if (shortest(face, out var path))
             {
                 t = path.Count() * 0.04f;
                 t = Mathf.Clamp01(t);

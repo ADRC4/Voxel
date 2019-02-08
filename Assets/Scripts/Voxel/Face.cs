@@ -86,19 +86,6 @@ public class Face
             v.Faces.Add(this);
 
         Center = GetCenter();
-
-        // var center = Corner + new Vector3(x, y+0.5f, z + 0.5f) * VoxelSize;
-
-        //Frame = new FrameElement2Node(start, end)
-        //{
-        //    Iy = 0.02,
-        //    Iz = 0.02,
-        //    A = 0.01,
-        //    J = 0.05,
-        //    E = 210e9,
-        //    G = 70e9,
-        //    ConsiderShearDeformation = false,
-        //};
     }
 
     Vector3 GetCenter()
@@ -145,7 +132,7 @@ public class Face
                 {
                    z == 0 ? null : _grid.Voxels[x, y, z - 1],
                    z == _grid.Size.z ? null : _grid.Voxels[x, y, z]
-                 };
+                };
             default:
                 throw new Exception("Wrong direction.");
         }
@@ -177,7 +164,7 @@ public class Face
                 };
             case Axis.Z:
                 return new[]
-               {
+                {
                   _grid.Edges[0][x, y, z],
                   _grid.Edges[0][x, y + 1, z],
                   _grid.Edges[1][x, y, z],
@@ -214,7 +201,7 @@ public class Face
                 };
             case Axis.Z:
                 return new[]
-{
+                {
                  _grid.Corners[x, y, z],
                  _grid.Corners[x + 1, y, z],
                  _grid.Corners[x, y + 1, z],

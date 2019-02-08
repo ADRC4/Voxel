@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using QuickGraph;
+using QuickGraph.Algorithms;
 
 public class VoxelGrowth : MonoBehaviour
 {
@@ -20,7 +21,7 @@ public class VoxelGrowth : MonoBehaviour
     GameObject _voids;
     Mesh[] _meshes;
 
-    List<Voxel> _orderedVoxels = new List<Voxel>();
+    List<(Voxel, float)> _orderedVoxels = new List<(Voxel, float)>();
     int _animatedCount;
     Coroutine _animation;
 
@@ -60,8 +61,8 @@ public class VoxelGrowth : MonoBehaviour
     {
         if (_grid == null) return;
 
-        foreach (var voxel in _orderedVoxels.Take(_animatedCount))
-            Drawing.DrawCube(voxel.Center, _grid.VoxelSize);
+        foreach (var (voxel, f) in _orderedVoxels.Take(_animatedCount))
+            Drawing.DrawCube(voxel.Center, _grid.VoxelSize, f);
     }
 
     void GrowVoxels()
@@ -95,16 +96,14 @@ public class VoxelGrowth : MonoBehaviour
         bottomCentroid.y = 0;
 
         var startVoxel = bottomSlab.MinBy(v => (v.Center - bottomCentroid).sqrMagnitude);
-        var shortest = QuickGraph.Algorithms.AlgorithmExtensions.ShortestPathsDijkstra(graph, e => 1.0, startVoxel);
+        var shortest = graph.ShortestPathsDijkstra(e => 1.0, startVoxel);
 
         _orderedVoxels = _grid
                           .GetVoxels()
                           .Where(v => v.IsActive)
-                          .OrderBy(v =>
-                          {
-                              IEnumerable<TaggedEdge<Voxel, Face>> path;
-                              return shortest(v, out path) ? path.Count() + Random.value * 0.9f : float.MaxValue;
-                          })
+                          .Select(v => (v, shortest(v, out var path) ? path.Count() + Random.value * 0.9f : float.MaxValue))
+                          .OrderBy(p => p.Item2)
+                          .Select(p => (p.v, p.Item2 / 20f))
                           .ToList();
     }
 

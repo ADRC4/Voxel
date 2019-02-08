@@ -91,15 +91,20 @@ class Drawing : MonoBehaviour
 
     // drawing
 
-    public static void DrawCube(Vector3 center, float size)
+    public static void DrawCube(Vector3 center, float size, float t)
     {
+        var color = _gradient.Evaluate(t);
+        var properties = new MaterialPropertyBlock();
+        properties.SetColor("_Color", color);
+        //properties.SetTexture("_MainTex", null);
+
         var matrix = Matrix4x4.TRS(
                 center,
                 Quaternion.identity,
                 Vector3.one * (size * 0.96f)
                 );
 
-        Graphics.DrawMesh(_unitBox, matrix, _instance._opaque, 0);
+        Graphics.DrawMesh(_unitBox, matrix, _instance._opaque, 0, null, 0, properties);
     }
 
     //public static void DrawFace(Vector3 center, Normal direction, float size)

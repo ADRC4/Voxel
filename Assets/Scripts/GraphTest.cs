@@ -57,7 +57,7 @@ public class GraphTest : MonoBehaviour
         var size = _grid.VoxelSize;
 
         foreach (var c in _centers)
-            Drawing.DrawCube(c, size);
+            Drawing.DrawCube(c, size,0);
     }
 
     private void Run()
