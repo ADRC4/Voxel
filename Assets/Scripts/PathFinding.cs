@@ -134,8 +134,7 @@ public class PathFinding : MonoBehaviour
 
         // draw a polyline for the start-end path
         {
-            IEnumerable<TaggedEdge<Face, Edge>> path;
-            if (shortest(end, out path))
+            if (shortest(end, out var path))
             {
                 float offset = 0.1f;
                 var vertices = new List<Vector3>();
