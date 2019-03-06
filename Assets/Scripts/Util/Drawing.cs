@@ -16,10 +16,10 @@ class Drawing : MonoBehaviour
 
     //Mesh _box;
     static Mesh _unitBox;
-    Mesh _cylinder;
+    static Mesh _cylinder;
+    static MaterialPropertyBlock _properties;
 
     public static System.Random Random = new System.Random(42);
-
 
     void Awake()
     {
@@ -34,6 +34,8 @@ class Drawing : MonoBehaviour
 
         _black = new Material(Shader.Find("Unlit/Color"));
         _black.color = Color.black;
+        _properties = new MaterialPropertyBlock();
+        _properties.SetTexture("_MainTex",new Texture2D(1,1));
     }
 
     static Texture2D GradientTexture()
@@ -91,12 +93,10 @@ class Drawing : MonoBehaviour
 
     // drawing
 
-    public static void DrawCube(Vector3 center, float size, float t)
+    public static void DrawCube(Vector3 center, float size, float t = 0)
     {
-        //var color = _gradient.Evaluate(t);
-        //var properties = new MaterialPropertyBlock();
-        //properties.SetColor("_Color", color);
-        ////properties.SetTexture("_MainTex", null);
+        var color = _gradient.Evaluate(t);
+        _properties.SetColor("_Color", color);
 
         var matrix = Matrix4x4.TRS(
                 center,
@@ -104,7 +104,7 @@ class Drawing : MonoBehaviour
                 Vector3.one * (size * 0.96f)
                 );
 
-        Graphics.DrawMesh(_unitBox, matrix, _instance._opaque, 0);
+        Graphics.DrawMesh(_unitBox, matrix, _instance._opaque, 0, null, 0, _properties);
     }
 
     //public static void DrawFace(Vector3 center, Normal direction, float size)
@@ -140,19 +140,17 @@ class Drawing : MonoBehaviour
     public static void DrawBar(Vector3 start, Vector3 end, float radius, float t)
     {
         var color = _gradient.Evaluate(t);
-        var properties = new MaterialPropertyBlock();
-        properties.SetColor("_Color", color);
-        properties.SetTexture("_MainTex", null);
+        _properties.SetColor("_Color", color);
 
         var vector = end - start;
 
         var matrix = Matrix4x4.TRS(
                         start + vector * 0.5f,
-                        Quaternion.LookRotation(vector) * Quaternion.Euler(90, 0, 0),
+                        Quaternion.LookRotation(vector) *   Quaternion.Euler(90, 0, 0),
                         new Vector3(radius, vector.magnitude * 0.5f, radius)
                         );
 
-        Graphics.DrawMesh(_instance._cylinder, matrix, _instance._opaque, 0, null, 0, properties);
+        Graphics.DrawMesh(_cylinder, matrix, _instance._opaque, 0, null, 0, _properties);
     }
 
     public static void DrawMesh(bool isTransparent, params Mesh[] mesh)
@@ -268,7 +266,6 @@ class Drawing : MonoBehaviour
         };
 
         mesh.SetIndices(tris, MeshTopology.Triangles, 0);
-
         mesh.RecalculateBounds();
         // mesh.RecalculateTangents();
         return mesh;

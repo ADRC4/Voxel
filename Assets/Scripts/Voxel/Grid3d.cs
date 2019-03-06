@@ -17,18 +17,18 @@ public class Grid3d
     public Vector3Int Size;
     public float VoxelSize;
     public Vector3 Corner;
-    public Bounds Bbox;
+    public Bounds BBox;
 
-   // public Mesh[] Mesh;
+    // public Mesh[] Mesh;
 
-    public static Grid3d MakeGridWithVoids(IEnumerable<MeshCollider> voids, float voxelSize)
+    public static Grid3d MakeGridWithVoids(IEnumerable<MeshCollider> voids, float voxelSize, bool invert = false)
     {
         var bbox = new Bounds();
         foreach (var v in voids.Select(v => v.bounds))
             bbox.Encapsulate(v);
 
         var grid = new Grid3d(bbox, voxelSize);
-        grid.AddVoids(voids);
+        grid.AddVoids(voids, invert);
 
         return grid;
     }
@@ -37,7 +37,7 @@ public class Grid3d
     {
         var watch = Stopwatch.StartNew();
 
-        Bbox = bbox;
+        BBox = bbox;
         VoxelSize = voxelSize;
 
         bbox.min = new Vector3(bbox.min.x, 0, bbox.min.z);
@@ -128,13 +128,18 @@ public class Grid3d
 
     public Grid3d Clone()
     {
-        return new Grid3d(Bbox, VoxelSize);
+        return new Grid3d(BBox, VoxelSize);
     }
 
-    public void AddVoids(IEnumerable<MeshCollider> voids)
+    public void AddVoids(IEnumerable<MeshCollider> voids, bool invert = false)
     {
         foreach (var voxel in GetVoxels())
+        {
             voxel.IsActive = !voxel.IsInside(voids);
+
+            if (invert)
+                voxel.IsActive = !voxel.IsActive;
+        }
     }
 
     public IEnumerable<Voxel> GetVoxels()

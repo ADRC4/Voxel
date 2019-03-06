@@ -92,7 +92,7 @@ public class VoxelGrowth : MonoBehaviour
                             .Where(v => v.IsActive && v.Index.y == 0)
                             .ToList();
 
-        var bottomCentroid = _grid.Bbox.center;
+        var bottomCentroid = _grid.BBox.center;
         bottomCentroid.y = 0;
 
         var startVoxel = bottomSlab.MinBy(v => (v.Center - bottomCentroid).sqrMagnitude);
@@ -103,7 +103,7 @@ public class VoxelGrowth : MonoBehaviour
                           .Where(v => v.IsActive)
                           .Select(v => (v, shortest(v, out var path) ? path.Count() + Random.value * 0.9f : float.MaxValue))
                           .OrderBy(p => p.Item2)
-                          .Select(p => (p.v, p.Item2 / 20f))
+                          .Select(p => (p.v, p.Item2 / 30f))
                           .ToList();
     }
 
