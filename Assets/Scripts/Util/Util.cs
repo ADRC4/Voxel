@@ -5,6 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
+public enum Axis { X, Y, Z };
+public enum BoundaryType { Inside = 0, Left = -1, Right = 1, Outside = 2 }
+
 static class Util
 {
     public static Vector3 Average(this IEnumerable<Vector3> vectors)

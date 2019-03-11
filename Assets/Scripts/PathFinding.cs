@@ -5,6 +5,7 @@ using UnityEngine;
 using QuickGraph;
 using QuickGraph.Algorithms;
 using System;
+using DenseGrid;
 
 public class PathFinding : MonoBehaviour
 {

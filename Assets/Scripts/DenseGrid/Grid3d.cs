@@ -5,9 +5,11 @@ using System.Diagnostics;
 using QuickGraph;
 using Debug = UnityEngine.Debug;
 
-public enum Axis { X, Y, Z };
 
-public class Grid3d
+
+namespace DenseGrid
+{
+    public class Grid3d
 {
     public Voxel[,,] Voxels;
     public Corner[,,] Corners;
@@ -206,4 +208,5 @@ public class Grid3d
         var count = QuickGraph.Algorithms.AlgorithmExtensions.ConnectedComponents(graph, components);
         return count;
     }
+}
 }

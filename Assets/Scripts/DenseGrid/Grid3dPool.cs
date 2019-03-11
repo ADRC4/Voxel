@@ -6,7 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-public class Grid3dPool
+namespace DenseGrid
+{
+    public class Grid3dPool
 {
     private ConcurrentBag<Grid3d> _objects;
     Grid3d _grid;
@@ -28,4 +30,5 @@ public class Grid3dPool
     {
         _objects.Add(item);
     }
+}
 }

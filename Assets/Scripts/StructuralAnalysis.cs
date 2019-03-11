@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using BriefFiniteElementNet;
 using BriefFiniteElementNet.Elements;
+using DenseGrid;
 
 public class StructuralAnalysis : MonoBehaviour
 {

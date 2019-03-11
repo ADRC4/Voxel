@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine;
 using QuickGraph;
 using QuickGraph.Algorithms;
+using DenseGrid;
 
 public class VoxelGrowth : MonoBehaviour
 {

@@ -6,7 +6,9 @@ using BriefFiniteElementNet.Elements;
 using System;
 using QuickGraph;
 
-public class Face
+namespace DenseGrid
+{
+    public class Face
 {
     public enum BoundaryType { Inside = 0, Left = -1, Right = 1, Outside = 2 }
 
@@ -211,4 +213,5 @@ public class Face
                 throw new Exception("Wrong direction.");
         }
     }
+}
 }

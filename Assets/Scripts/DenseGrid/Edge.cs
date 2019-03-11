@@ -5,7 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-public class Edge
+namespace DenseGrid
+{
+    public class Edge
 {
     public Vector3Int Index;
     public Axis Direction;
@@ -131,4 +133,5 @@ public class Edge
                 throw new Exception("Wrong direction.");
         }
     }
+}
 }

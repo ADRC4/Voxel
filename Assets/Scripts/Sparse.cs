@@ -5,9 +5,9 @@ using UnityEngine;
 using QuickGraph;
 using QuickGraph.Algorithms;
 using System;
-using DenseGrid;
+using SparseGrid;
 
-public class MaximalFlow : MonoBehaviour
+public class Sparse : MonoBehaviour
 {
     // UI
     [SerializeField]
@@ -64,45 +64,18 @@ public class MaximalFlow : MonoBehaviour
     {
         if (_grid == null) return;
 
-        foreach (var voxel in _grid.GetVoxels().Where(v => v.IsActive))
+        foreach (var voxel in _grid.GetVoxels())
             Drawing.DrawCube(voxel.Center, _grid.VoxelSize * 0.5f, 0.8f);
-
-        foreach (var voxel in _flowPath)
-            Drawing.DrawCube(voxel.Center, _grid.VoxelSize, 0);
     }
-
-    List<Voxel> _flowPath = new List<Voxel>();
 
     void MakeGrid()
     {
-        var colliders = _voids
+        var bounds = _voids
                       .GetComponentsInChildren<MeshCollider>()
+                      .Select(c=>c.bounds)
                       .ToArray();
 
         var voxelSize = float.Parse(_voxelSize);
-        _grid = Grid3d.MakeGridWithVoids(colliders, voxelSize, true);
-
-        var faces = _grid.GetFaces().Where(f => f.IsActive);
-        var graphEdges = faces.Select(f => new TaggedEdge<Voxel, Face>(f.Voxels[0], f.Voxels[1], f));
-        var graph = graphEdges.ToAdjacencyGraph<Voxel, TaggedEdge<Voxel, Face>>();
-
-        var voxels = _grid.GetVoxels().Where(v => v.IsActive);
-
-        var start = voxels.First();
-        var end = voxels.ElementAt(200);
-
-        var flow = graph.MaximumFlowEdmondsKarp(_ => 1, start, end, out var predecessors, (s, e) => new TaggedEdge<Voxel, Face>(s, e, null));
-
-
-        var current = end;
-        _flowPath.Add(current);
-
-        while (predecessors(current, out var next))
-        {
-            current = next.GetOtherVertex(current);
-            _flowPath.Add(current);
-        }
-
-        print(flow);
+        _grid = Grid3d.MakeGridWithBounds(bounds, voxelSize);
     }
 }
