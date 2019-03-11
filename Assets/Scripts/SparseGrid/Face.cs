@@ -12,7 +12,6 @@ namespace SparseGrid
         public Vector3Int Index;
         public Vector3 Center;
         public Axis Direction;
-
         public Edge[] Edges => GetEdges();
         public Corner[] Corners => GetCorners();
 

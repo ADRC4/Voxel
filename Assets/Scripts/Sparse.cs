@@ -66,7 +66,12 @@ public class Sparse : MonoBehaviour
 
         foreach (var voxel in _grid.GetVoxels())
             Drawing.DrawCube(voxel.Center, _grid.VoxelSize * 0.5f, 0.8f);
+
+        foreach (var voxel in _flowPath)
+            Drawing.DrawCube(voxel.Center, _grid.VoxelSize, 0);
     }
+
+    List<Voxel> _flowPath = new List<Voxel>();
 
     void MakeGrid()
     {
@@ -77,5 +82,25 @@ public class Sparse : MonoBehaviour
 
         var voxelSize = float.Parse(_voxelSize);
         _grid = Grid3d.MakeGridWithBounds(bounds, voxelSize);
+
+       //  shortest path to test if connectivity is working
+        var faces = _grid.GetFaces().Where(f => f.IsActive).ToList();
+        var graphEdges = faces.Select(f => new TaggedEdge<Voxel, Face>(f.Voxels[0], f.Voxels[1], f));
+        var graph = graphEdges.ToUndirectedGraph<Voxel, TaggedEdge<Voxel, Face>>();
+
+        var start = _grid.GetVoxels().ElementAt(2);
+        var end = _grid.GetVoxels().ElementAt(250);
+
+        var shortest = graph.ShortestPathsDijkstra(_ => 1, start);
+
+        shortest(end, out var path);
+        var current = start;
+        _flowPath.Add(current);
+
+        foreach(var face in path)
+        {
+            current = face.GetOtherVertex(current);
+            _flowPath.Add(current);
+        }
     }
 }

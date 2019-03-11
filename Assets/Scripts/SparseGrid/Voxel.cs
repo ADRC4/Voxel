@@ -10,7 +10,6 @@ namespace SparseGrid
         public Vector3 Center;
         public bool IsActive;
         public float Value;
-        // public List<Face> Faces = new List<Face>(6);
 
         public bool IsClimbable => IsActive && Faces.Any(f => f.IsClimbable);
 
