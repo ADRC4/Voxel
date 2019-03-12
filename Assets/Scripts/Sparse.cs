@@ -95,6 +95,7 @@ public class Sparse : MonoBehaviour
 
         shortest(end, out var path);
         var current = start;
+        _flowPath = new List<Voxel>();
         _flowPath.Add(current);
 
         foreach(var face in path)

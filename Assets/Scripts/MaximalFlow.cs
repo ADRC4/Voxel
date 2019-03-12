@@ -65,7 +65,7 @@ public class MaximalFlow : MonoBehaviour
         if (_grid == null) return;
 
         foreach (var voxel in _grid.GetVoxels().Where(v => v.IsActive))
-            Drawing.DrawCube(voxel.Center, _grid.VoxelSize * 0.5f, 0.8f);
+            Drawing.DrawCube(voxel.Center, _grid.VoxelSize * 0.9f, 0.8f);
 
         foreach (var voxel in _flowPath)
             Drawing.DrawCube(voxel.Center, _grid.VoxelSize, 0);
@@ -89,12 +89,13 @@ public class MaximalFlow : MonoBehaviour
         var voxels = _grid.GetVoxels().Where(v => v.IsActive);
 
         var start = voxels.First();
-        var end = voxels.ElementAt(200);
+        var end = voxels.ElementAt(100);
 
         var flow = graph.MaximumFlowEdmondsKarp(_ => 1, start, end, out var predecessors, (s, e) => new TaggedEdge<Voxel, Face>(s, e, null));
 
 
         var current = end;
+        _flowPath = new List<Voxel>();
         _flowPath.Add(current);
 
         while (predecessors(current, out var next))
