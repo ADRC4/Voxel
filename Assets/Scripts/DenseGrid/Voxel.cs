@@ -11,7 +11,9 @@ namespace DenseGrid
         public bool IsActive;
         public float Value;
         public List<Face> Faces = new List<Face>(6);
+        public int Tile;
 
+        public bool IsEmpty => Tile == 0;
         public bool IsClimbable => IsActive && Faces.Any(f => f.IsClimbable);
 
         Grid3d _grid;
@@ -22,6 +24,15 @@ namespace DenseGrid
             Index = index;
             Center = grid.Corner + new Vector3(index.x + 0.5f, index.y + 0.5f, index.z + 0.5f) * grid.VoxelSize;
             IsActive = true;
+        }
+
+        public Voxel(Voxel voxel)
+        {
+            _grid = voxel._grid;
+            Index = voxel.Index;
+            Center = voxel.Center;
+            IsActive = voxel.IsActive;
+            _grid.Voxels[Index.x, Index.y, Index.z] = this;
         }
 
         internal bool IsInside(IEnumerable<MeshCollider> colliders)
