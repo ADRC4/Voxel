@@ -904,7 +904,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2022931658}
   - component: {fileID: 2022931657}
-  - component: {fileID: 2022931656}
+  - component: {fileID: 2022931654}
   m_Layer: 0
   m_Name: MainController
   m_TagString: Untagged
@@ -912,7 +912,7 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &2022931656
+--- !u!114 &2022931654
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -921,7 +921,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 2022931653}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 16b908ccca5892843bccc8582e1d964d, type: 3}
+  m_Script: {fileID: 11500000, guid: 861647020bded2b4cba3885f0f47d623, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _skin: {fileID: 11400000, guid: b817b50cdf178c748b89513f6e22b9fb, type: 2}

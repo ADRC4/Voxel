@@ -10,7 +10,7 @@ public class PlacePattern : MonoBehaviour
 {
     // UI
     [SerializeField]
-    GUISkin _skin;
+    GUISkin _skin = null;
 
     Rect _windowRect = new Rect(20, 20, 150, 160);
 
@@ -20,8 +20,8 @@ public class PlacePattern : MonoBehaviour
 
     private void Start()
     {
-        var bbox = new Bounds(new Vector3(10, 10, 5), new Vector3(20, 20, 10));
-        _grid = new Grid3d(bbox, 0.5f);
+        var bbox = new Bounds(new Vector3(5, 5, 3), new Vector3(10, 10, 6));
+        _grid = new Grid3d(bbox, 1f);
 
         PatternTest();
     }
@@ -34,8 +34,8 @@ public class PlacePattern : MonoBehaviour
 
     void WindowFunction(int windowID)
     {
-        int i = 1;
-        int s = 25;
+        //int i = 1;
+        //int s = 25;
     }
 
     void PatternTest()

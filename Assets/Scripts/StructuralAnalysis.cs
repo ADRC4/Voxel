@@ -10,7 +10,7 @@ public class StructuralAnalysis : MonoBehaviour
 {
     // UI
     [SerializeField]
-    GUISkin _skin;
+    GUISkin _skin = null;
 
     bool _toggleVoids = true;
     bool _toggleTransparency = false;
@@ -47,10 +47,7 @@ public class StructuralAnalysis : MonoBehaviour
 
         if (_toggleVoids != GUI.Toggle(new Rect(s, s * i++, 100, 20), _toggleVoids, "Show voids"))
         {
-            _toggleVoids = !_toggleVoids;
-
-            foreach (var r in _voids.GetComponentsInChildren<Renderer>())
-                r.enabled = _toggleVoids;
+            ToggleVoids();
         }
 
         _toggleTransparency = GUI.Toggle(new Rect(s, s * i++, 100, 20), _toggleTransparency, "Transparent");
@@ -72,6 +69,14 @@ public class StructuralAnalysis : MonoBehaviour
         Drawing.DrawMesh(_toggleTransparency, _meshes);
     }
 
+    void ToggleVoids()
+    {
+        _toggleVoids = !_toggleVoids;
+
+        foreach (var r in _voids.GetComponentsInChildren<Renderer>())
+            r.enabled = _toggleVoids;
+    }
+
     void MakeGrid()
     {
         var colliders = _voids
@@ -83,6 +88,7 @@ public class StructuralAnalysis : MonoBehaviour
         _grid = Grid3d.MakeGridWithVoids(colliders, voxelSize);
         Analysis();
         MakeVoxelMesh();
+        ToggleVoids();
     }
 
     void Analysis()

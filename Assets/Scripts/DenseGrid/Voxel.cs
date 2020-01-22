@@ -14,7 +14,7 @@ namespace DenseGrid
         public int Tile;
 
         public bool IsEmpty => Tile == 0;
-        public bool IsClimbable => IsActive && Faces.Any(f => f.IsClimbable);
+        public bool IsSkin => IsActive && Faces.Any(f => f.IsSkin);
 
         Grid3d _grid;
 
@@ -61,9 +61,9 @@ namespace DenseGrid
 
         public IEnumerable<Corner> GetCorners()
         {
-            for (int y = 0; y <= 1; y++)
-                for (int z = 0; z <= 1; z++)
-                    for (int x = 0; x <= 1; x++)
+            for (int x = 0; x <= 1; x++)
+                for (int y = 0; y <= 1; y++)
+                    for (int z = 0; z <= 1; z++)
                     {
                         yield return _grid.Corners[Index.x + x, Index.y + y, Index.z + z];
                     }
@@ -73,20 +73,20 @@ namespace DenseGrid
         {
             var s = _grid.Size;
 
-            for (int zi = -1; zi <= 1; zi++)
+            for (int xi = -1; xi <= 1; xi++)
             {
-                int z = zi + Index.z;
-                if (z == -1 || z == s.z) continue;
+                int x = xi + Index.x;
+                if (x == -1 || x == s.x) continue;
 
                 for (int yi = -1; yi <= 1; yi++)
                 {
                     int y = yi + Index.y;
                     if (y == -1 || y == s.y) continue;
 
-                    for (int xi = -1; xi <= 1; xi++)
+                    for (int zi = -1; zi <= 1; zi++)
                     {
-                        int x = xi + Index.x;
-                        if (x == -1 || x == s.x) continue;
+                        int z = zi + Index.z;
+                        if (z == -1 || x == s.z) continue;
 
                         var i = new Vector3Int(x, y, z);
                         if (Index == i) continue;

@@ -11,7 +11,7 @@ public class PathFinding : MonoBehaviour
 {
     // UI
     [SerializeField]
-    GUISkin _skin;
+    GUISkin _skin = null;
 
     bool _toggleVoids = true;
     bool _toggleTransparency = false;
@@ -83,13 +83,13 @@ public class PathFinding : MonoBehaviour
         var graph = graphEdges.ToUndirectedGraph<Face, TaggedEdge<Face, Edge>>();
 
         // start face for shortest path
-        var start = _grid.GetFaces().Where(f => f.IsClimbable).Skip(10).First();
+        var start = _grid.GetFaces().Where(f => f.IsSkin).Skip(10).First();
 
         // calculate shortest path from start face to all boundary faces
         var shortest = graph.ShortestPathsDijkstra(e => 1.0, start);
 
         // select an end face to draw one specific path
-        var end = _grid.GetFaces().Where(f => f.IsClimbable).Skip(200).First();
+        var end = _grid.GetFaces().Where(f => f.IsSkin).Skip(200).First();
 
         shortest(end, out var endPath);
 
@@ -99,7 +99,7 @@ public class PathFinding : MonoBehaviour
         // create a mesh face for every outer face colored based on the path length (except a solid yellow path to end face)
         var faceMeshes = new List<CombineInstance>();
 
-        foreach (var face in _grid.GetFaces().Where(f => f.IsClimbable))
+        foreach (var face in _grid.GetFaces().Where(f => f.IsSkin))
         {
             float t = 1;
 

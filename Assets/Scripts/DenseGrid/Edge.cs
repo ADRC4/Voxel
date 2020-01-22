@@ -14,7 +14,7 @@ namespace DenseGrid
     public Vector3 Center;
     public Voxel[] Voxels;
     public Face[] Faces;
-    public Face[] ClimbableFaces => Faces.Where(f => f?.IsClimbable == true).ToArray();
+    public Face[] ClimbableFaces => Faces.Where(f => f?.IsSkin == true).ToArray();
 
     Grid3d _grid;
 

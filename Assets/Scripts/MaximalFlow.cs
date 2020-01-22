@@ -11,10 +11,9 @@ public class MaximalFlow : MonoBehaviour
 {
     // UI
     [SerializeField]
-    GUISkin _skin;
+    GUISkin _skin = null;
 
     bool _toggleVoids = true;
-    bool _toggleTransparency = true;
     string _voxelSize = "0.8";
     Rect _windowRect = new Rect(20, 20, 150, 160);
 
@@ -48,8 +47,6 @@ public class MaximalFlow : MonoBehaviour
 
         if (_toggleVoids != GUI.Toggle(new Rect(s, s * i++, 100, 20), _toggleVoids, "Show voids"))
             ToggleVoids();
-
-        _toggleTransparency = GUI.Toggle(new Rect(s, s * i++, 100, 20), _toggleTransparency, "Transparent");
     }
 
     private void ToggleVoids()

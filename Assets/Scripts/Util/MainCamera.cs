@@ -6,7 +6,7 @@ public class MainCamera : MonoBehaviour
 
     void Start()
     {
-        _target = transform.forward * 2;
+        _target = transform.position + transform.forward * 16;
     }
 
     void Update()

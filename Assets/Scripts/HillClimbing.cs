@@ -6,14 +6,14 @@ using System.Threading.Tasks;
 using UnityEngine;
 using DenseGrid;
 
-public class GraphTest : MonoBehaviour
+public class HillClimbing : MonoBehaviour
 {
+    [SerializeField] GUISkin _skin = null;
+
     Grid3d _grid = null;
     string _voxelSize = "0.8";
     CancellationTokenSource _cancel = new CancellationTokenSource();
-    private bool _enableDraw = true;
-
-    [SerializeField] GUISkin _skin;
+    List<Vector3> _centers = new List<Vector3>();
 
 
     private void Start()
@@ -24,7 +24,14 @@ public class GraphTest : MonoBehaviour
     void Update()
     {
         if (_grid == null) return;
-        DrawActiveBoxes();
+
+        lock (_centers)
+        {
+            var size = _grid.VoxelSize;
+
+            foreach (var c in _centers)
+                Drawing.DrawCube(c, size, 0);
+        }
     }
 
     void OnGUI()
@@ -41,24 +48,15 @@ public class GraphTest : MonoBehaviour
         }
     }
 
-    List<Vector3> _centers = new List<Vector3>();
-
-    void DrawActiveBoxes()
+    void UpdateActiveVoxels()
     {
-        if (_enableDraw)
+        _centers.Clear();
+
+        foreach (var voxel in _grid.GetVoxels())
         {
-            _centers.Clear();
-            foreach (var voxel in _grid.GetVoxels())
-            {
-                if (voxel.IsActive)
-                    _centers.Add(voxel.Center);
-            }
+            if (voxel.IsActive)
+                _centers.Add(voxel.Center);
         }
-
-        var size = _grid.VoxelSize;
-
-        foreach (var c in _centers)
-            Drawing.DrawCube(c, size,0);
     }
 
     private void Run()
@@ -80,33 +78,50 @@ public class GraphTest : MonoBehaviour
 
     void RemoveVoxels(CancellationToken token)
     {
-        int lastClimbable = _grid.GetFaces().Count(f => f.IsClimbable);
+        int lastFitness = int.MinValue;
 
         for (int i = 0; i < 100000; i++)
         {
-            var actives = _grid.GetVoxels().Where(v => v.IsClimbable).ToList();
+            if (token.IsCancellationRequested) break;
+
+            var actives = _grid.GetVoxels().Where(v => v.IsSkin).ToList();
             var random = Drawing.Random.Next(0, actives.Count);
             var active = actives[random];
-
-            _enableDraw = false;
 
             active.IsActive = false;
 
             if (_grid.GetConnectedComponents() != 1)
+            {
                 active.IsActive = true;
+                continue;
+            }
 
-            int climbableCount = _grid.GetFaces().Count(f => f.IsClimbable);
+            int fitness = 0;
 
-            if (climbableCount < lastClimbable)
+            foreach (var voxel in _grid.GetVoxels())
+            {
+                if (!voxel.IsActive) continue;
+
+                var neighbourCount = voxel
+                    .GetFaceNeighbours()
+                    .Count(n => n.IsActive);
+
+                if (neighbourCount == 2)
+                    fitness += 1;
+            }
+
+            if (fitness < lastFitness)
+            {
                 active.IsActive = true;
-            else
-                lastClimbable = climbableCount;
+                continue;
+            }
 
-            _enableDraw = true;
+            lastFitness = fitness;
 
-            Debug.Log(lastClimbable);
+            lock (_centers)
+                UpdateActiveVoxels();
 
-            if (token.IsCancellationRequested) break;
+            // Debug.Log(fitness);
         }
     }
 

@@ -10,17 +10,15 @@ public class VoxelGrowth : MonoBehaviour
 {
     // UI
     [SerializeField]
-    GUISkin _skin;
+    GUISkin _skin = null;
 
     bool _toggleVoids = true;
-    bool _toggleTransparency = false;
     string _voxelSize = "0.8";
     Rect _windowRect = new Rect(20, 20, 150, 160);
 
     // grid
     Grid3d _grid = null;
     GameObject _voids;
-    Mesh[] _meshes;
 
     List<(Voxel, float)> _orderedVoxels = new List<(Voxel, float)>();
     int _animatedCount;
@@ -48,14 +46,7 @@ public class VoxelGrowth : MonoBehaviour
             GrowVoxels();
 
         if (_toggleVoids != GUI.Toggle(new Rect(s, s * i++, 100, 20), _toggleVoids, "Show voids"))
-        {
-            _toggleVoids = !_toggleVoids;
-
-            foreach (var r in _voids.GetComponentsInChildren<Renderer>())
-                r.enabled = _toggleVoids;
-        }
-
-        _toggleTransparency = GUI.Toggle(new Rect(s, s * i++, 100, 20), _toggleTransparency, "Transparent");
+            ToggleVoids(!_toggleVoids);
     }
 
     void Update()
@@ -66,6 +57,14 @@ public class VoxelGrowth : MonoBehaviour
             Drawing.DrawCube(voxel.Center, _grid.VoxelSize, f);
     }
 
+    void ToggleVoids(bool toggle)
+    {
+        foreach (var r in _voids.GetComponentsInChildren<Renderer>())
+            r.enabled = toggle;
+
+        _toggleVoids = toggle;
+    }
+
     void GrowVoxels()
     {
         _animatedCount = 0;
@@ -73,6 +72,8 @@ public class VoxelGrowth : MonoBehaviour
 
         if (_animation != null) StopCoroutine(_animation);
         _animation = StartCoroutine(GrowthAnimation());
+
+        ToggleVoids(false);
     }
 
     void MakeGrid()

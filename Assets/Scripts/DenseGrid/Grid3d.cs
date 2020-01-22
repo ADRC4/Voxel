@@ -51,9 +51,9 @@ namespace DenseGrid
             // make voxels
             Voxels = new Voxel[Size.x, Size.y, Size.z];
 
-            for (int z = 0; z < Size.z; z++)
+            for (int x = 0; x < Size.x; x++)
                 for (int y = 0; y < Size.y; y++)
-                    for (int x = 0; x < Size.x; x++)
+                    for (int z = 0; z < Size.z; z++)
                     {
                         Voxels[x, y, z] = new Voxel(new Vector3Int(x, y, z), this);
                     }
@@ -61,9 +61,9 @@ namespace DenseGrid
             // make corners
             Corners = new Corner[Size.x + 1, Size.y + 1, Size.z + 1];
 
-            for (int z = 0; z < Size.z + 1; z++)
+            for (int x = 0; x < Size.x + 1; x++)
                 for (int y = 0; y < Size.y + 1; y++)
-                    for (int x = 0; x < Size.x + 1; x++)
+                    for (int z = 0; z < Size.z + 1; z++)
                     {
                         Corners[x, y, z] = new Corner(new Vector3Int(x, y, z), this);
                     }
@@ -71,27 +71,27 @@ namespace DenseGrid
             // make faces
             Faces[0] = new Face[Size.x + 1, Size.y, Size.z];
 
-            for (int z = 0; z < Size.z; z++)
+            for (int x = 0; x < Size.x + 1; x++)
                 for (int y = 0; y < Size.y; y++)
-                    for (int x = 0; x < Size.x + 1; x++)
+                    for (int z = 0; z < Size.z; z++)
                     {
                         Faces[0][x, y, z] = new Face(x, y, z, Axis.X, this);
                     }
 
             Faces[1] = new Face[Size.x, Size.y + 1, Size.z];
 
-            for (int z = 0; z < Size.z; z++)
+            for (int x = 0; x < Size.x; x++)
                 for (int y = 0; y < Size.y + 1; y++)
-                    for (int x = 0; x < Size.x; x++)
+                    for (int z = 0; z < Size.z; z++)
                     {
                         Faces[1][x, y, z] = new Face(x, y, z, Axis.Y, this);
                     }
 
             Faces[2] = new Face[Size.x, Size.y, Size.z + 1];
 
-            for (int z = 0; z < Size.z + 1; z++)
+            for (int x = 0; x < Size.x; x++)
                 for (int y = 0; y < Size.y; y++)
-                    for (int x = 0; x < Size.x; x++)
+                    for (int z = 0; z < Size.z + 1; z++)
                     {
                         Faces[2][x, y, z] = new Face(x, y, z, Axis.Z, this);
                     }
@@ -99,27 +99,27 @@ namespace DenseGrid
             // make edges
             Edges[2] = new Edge[Size.x + 1, Size.y + 1, Size.z];
 
-            for (int z = 0; z < Size.z; z++)
+            for (int x = 0; x < Size.x + 1; x++)
                 for (int y = 0; y < Size.y + 1; y++)
-                    for (int x = 0; x < Size.x + 1; x++)
+                    for (int z = 0; z < Size.z; z++)
                     {
                         Edges[2][x, y, z] = new Edge(x, y, z, Axis.Z, this);
                     }
 
             Edges[0] = new Edge[Size.x, Size.y + 1, Size.z + 1];
 
-            for (int z = 0; z < Size.z + 1; z++)
+            for (int x = 0; x < Size.x; x++)
                 for (int y = 0; y < Size.y + 1; y++)
-                    for (int x = 0; x < Size.x; x++)
+                    for (int z = 0; z < Size.z + 1; z++)
                     {
                         Edges[0][x, y, z] = new Edge(x, y, z, Axis.X, this);
                     }
 
             Edges[1] = new Edge[Size.x + 1, Size.y, Size.z + 1];
 
-            for (int z = 0; z < Size.z + 1; z++)
+            for (int x = 0; x < Size.x + 1; x++)
                 for (int y = 0; y < Size.y; y++)
-                    for (int x = 0; x < Size.x + 1; x++)
+                    for (int z = 0; z < Size.z + 1; z++)
                     {
                         Edges[1][x, y, z] = new Edge(x, y, z, Axis.Y, this);
                     }
@@ -145,9 +145,9 @@ namespace DenseGrid
 
         public IEnumerable<Voxel> GetVoxels()
         {
-            for (int z = 0; z < Size.z; z++)
+            for (int x = 0; x < Size.x; x++)
                 for (int y = 0; y < Size.y; y++)
-                    for (int x = 0; x < Size.x; x++)
+                    for (int z = 0; z < Size.z; z++)
                     {
                         yield return Voxels[x, y, z];
                     }
@@ -155,9 +155,9 @@ namespace DenseGrid
 
         public IEnumerable<Corner> GetCorners()
         {
-            for (int z = 0; z < Size.z + 1; z++)
+            for (int x = 0; x < Size.x + 1; x++)
                 for (int y = 0; y < Size.y + 1; y++)
-                    for (int x = 0; x < Size.x + 1; x++)
+                    for (int z = 0; z < Size.z + 1; z++)
                     {
                         yield return Corners[x, y, z];
                     }
@@ -171,9 +171,9 @@ namespace DenseGrid
                 int ySize = Faces[n].GetLength(1);
                 int zSize = Faces[n].GetLength(2);
 
-                for (int z = 0; z < zSize; z++)
+                for (int x = 0; x < xSize; x++)
                     for (int y = 0; y < ySize; y++)
-                        for (int x = 0; x < xSize; x++)
+                        for (int z = 0; z < zSize; z++)
                         {
                             yield return Faces[n][x, y, z];
                         }
@@ -188,9 +188,9 @@ namespace DenseGrid
                 int ySize = Edges[n].GetLength(1);
                 int zSize = Edges[n].GetLength(2);
 
-                for (int z = 0; z < zSize; z++)
+                for (int x = 0; x < xSize; x++)
                     for (int y = 0; y < ySize; y++)
-                        for (int x = 0; x < xSize; x++)
+                        for (int z = 0; z < zSize; z++)
                         {
                             yield return Edges[n][x, y, z];
                         }

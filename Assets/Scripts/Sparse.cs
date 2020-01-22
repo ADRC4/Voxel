@@ -11,7 +11,7 @@ public class Sparse : MonoBehaviour
 {
     // UI
     [SerializeField]
-    GUISkin _skin;
+    GUISkin _skin = null;
 
     bool _toggleVoids = true;
     bool _toggleTransparency = true;

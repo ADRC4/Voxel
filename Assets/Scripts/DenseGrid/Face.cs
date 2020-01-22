@@ -64,7 +64,7 @@ namespace DenseGrid
         }
     }
 
-    public bool IsClimbable
+    public bool IsSkin
     {
         get
         {
