@@ -11,7 +11,7 @@ public class GraphExample : MonoBehaviour
 
     void Start()
     {
-        var bounds = new Bounds(new Vector3(0, 3, 0), new Vector3(10, 6, 6));
+        var bounds = new Bounds(new Vector3(0, 5, 0), new Vector3(15, 9, 9));
         _grid = new Grid3d(bounds, 0.8f);
 
         foreach (var voxel in _grid.GetVoxels())
@@ -23,6 +23,8 @@ public class GraphExample : MonoBehaviour
     IEnumerator GrowGrid()
     {
         int count = 100000;
+        int lastFitness = 0;
+
         while (count-- > 0)
         {
             var skinVoxels = _grid.GetVoxels().Where(v => v.IsSkin).ToList();
@@ -31,20 +33,38 @@ public class GraphExample : MonoBehaviour
                 break;
 
             var index = Random.Range(0, skinVoxels.Count);
-            var voxel = skinVoxels[index];
+            var candidate = skinVoxels[index];
 
-            voxel.IsActive = false;
+            candidate.IsActive = false;
 
             int componentCount = _grid.GetConnectedComponents();
             if(componentCount != 1)
             {
                 Debug.Log("Tried to remove a voxel that disconnected the structure.");
-                voxel.IsActive = true;
+                candidate.IsActive = true;
+                yield return null;
+            }
+
+            int fitness = 0;
+
+            foreach(var voxel in _grid.GetVoxels())
+            {
+                if (!voxel.IsActive) continue;
+                int neighbourCount = voxel.GetFaceNeighbours().Count(n => n.IsActive);
+
+                if (neighbourCount == 2)
+                    fitness += 1;
+            }
+
+            if(fitness < lastFitness)
+            {
+                Debug.Log("Fitness decreased.");
+                candidate.IsActive = true;
                 continue;
             }
 
+            lastFitness = fitness;
             UpdateCenters();
-
             yield return new WaitForSeconds(0.001f);
         }
     }
